@@ -15,7 +15,6 @@ import { Input } from "@/components/ui/input";
 import { ICourse } from "../models/course";
 import { formSchema } from "./add-course";
 
-
 export function UpdateCourse({
   course,
   onSave,
