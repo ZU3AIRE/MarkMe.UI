@@ -43,48 +43,34 @@ const formSchema = z.object({
     }),
 })
 
-const updateStudent = (student: { name: string | undefined; email: string | undefined; collegeRollNo: number | undefined; universityRollNo: number | undefined; session: string | undefined; phoneNumber: string | undefined; currentSemester: string | undefined; attendance: string | undefined; }, studentId: number) => {
-    const data: IStudent[] = JSON.parse(window.localStorage.getItem('students') || '[]') || [];
-    const std = data.find((std) => std.id === studentId);
-    const stdIndex = data.findIndex((std) => std.id === studentId);
-    if (std) {
-        std.name = student.name!;
-        std.email = student.email!;
-        std.collegeRollNo = student.collegeRollNo ?? 0;
-        std.universityRollNo = student.universityRollNo ?? 0;
-        std.session = student.session!;
-        std.phoneNumber = student.phoneNumber!;
-        std.currentSemester = student.currentSemester!;
-        std.attendance = student.attendance!;
-    }
-    if (stdIndex !== -1 && std) {
-        data[stdIndex] = std;
-        window.localStorage.setItem('students', JSON.stringify(data));
-    }
-}
 
-
-export function UpdateStudent({ studentId, onSave }: { studentId: number; onSave: () => void }) {
-    const data: IStudent[] = JSON.parse(window.localStorage.getItem('students') || '[]') || [];
-    const student = data.find((student) => student.id === studentId);
+export function UpdateStudent({
+    student,
+    onSave
+}: {
+    student: IStudent;
+    onSave: (student: IStudent | null) => void;
+}) {
     const form = useForm({
         resolver: zodResolver(formSchema),
-        defaultValues: {
-            name: student?.name,
-            email: student?.email,
-            collegeRollNo: student?.collegeRollNo,
-            universityRollNo: student?.universityRollNo,
-            session: student?.session,
-            phoneNumber: student?.phoneNumber,
-            currentSemester: student?.currentSemester,
-            attendance: student?.attendance,
-        },
+        defaultValues: student,
     })
 
-    function onSubmit(values: { name: string | undefined; email: string | undefined; collegeRollNo: number | undefined; universityRollNo: number | undefined; session: string | undefined; phoneNumber: string | undefined; currentSemester: string | undefined; attendance: string | undefined; }) {
-        updateStudent(values, studentId);
-        onSave();
+    const updateStudent = (student: IStudent, studentId: number) => {
+        const data: IStudent[] = JSON.parse(window.localStorage.getItem('students') || '[]') || [];
+        const stdIndex = data.findIndex((std) => std.id === studentId);
+        if (stdIndex !== -1) {
+            data[stdIndex] = { ...data[stdIndex], ...student };;
+            window.localStorage.setItem("students", JSON.stringify(data));
+            return data[stdIndex]
+        }
+        return null;
     }
+
+    function onSubmit(values: IStudent) {
+        onSave(updateStudent(values, student.id));
+    }
+
 
     return (
         <Form {...form}>
