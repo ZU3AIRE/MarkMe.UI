@@ -13,7 +13,7 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { IStudent, Students } from "../model/student"
+import { IStudent, Students } from "../models/student"
 
 
 const formSchema = z.object({
