@@ -47,12 +47,6 @@ jobs:
         run: ${{ env.runner }} next build
         env:
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
-
-      - name: Current Dir
-        run: ls -la
-      
-      - name: List .next directory contents
-        run: ls -la .next
     
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
