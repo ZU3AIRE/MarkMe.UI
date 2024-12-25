@@ -20,7 +20,7 @@ export function UpdateCourse({
   onSave,
 }: {
   course: ICourse;
-  onSave: (values: ICourse) => void;
+  onSave: (values: ICourse | null) => void;
 }) {
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -32,14 +32,15 @@ export function UpdateCourse({
     const foundCrsIndex = data.findIndex((crs) => crs.id === courseId);
 
     if (foundCrsIndex !== -1) {
-      data[foundCrsIndex] = { ...data[foundCrsIndex], ...course };
+      data[foundCrsIndex] = { ...data[foundCrsIndex], ...course };;
       window.localStorage.setItem("courses", JSON.stringify(data));
+      return data[foundCrsIndex]
     }
+    return null;
   };
 
   function onSubmit(values: ICourse) {
-    updateCourse(values, course.id);
-    onSave(values);
+    onSave(updateCourse(values, course.id));
   }
   return (
       <Form {...form}>
