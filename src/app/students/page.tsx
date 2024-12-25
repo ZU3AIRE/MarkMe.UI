@@ -235,13 +235,13 @@ export default function StudentsComp() {
         },
     })
 
-    const handleCloseDialog = () => {
-        const students = JSON.parse(window.localStorage.getItem('students') || '[]') || [];
-        setDataSource(students);
+    const onStudentAdded = (newStudent: IStudent) => {
+        setDataSource([...dataSource, newStudent]);
         setIsAddModalOpen(false);
-        const last = students[students.length - 1];
-        toast.success(`${last.name} added successfully!`);
-    }
+        toast.success(
+            `${newStudent.name} is added successfully!`
+        );
+    };
 
     const onStudentUpdated = (updatedStudent: IStudent | null) => {
         if (!updatedStudent) {
@@ -384,7 +384,7 @@ export default function StudentsComp() {
                             Add student. Click submit when you&apos;re done.
                         </DialogDescription>
                     </DialogHeader>
-                    <RegisterStudent onSave={handleCloseDialog} />
+                    <RegisterStudent onSave={onStudentAdded} />
                 </DialogContent>
             </Dialog>
 

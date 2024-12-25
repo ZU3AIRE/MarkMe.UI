@@ -43,23 +43,7 @@ const formSchema = z.object({
     }),
 })
 
-const registerStudent = (student: { name: string; email: string; collegeRollNo: number; universityRollNo: number; session: string; phoneNumber: string; currentSemester: string; attendance: string; }) => {
-    const data: IStudent[] = JSON.parse(window.localStorage.getItem('students') || '[]') || [];
-    const newStudent = new Students(
-        student.name,
-        student.email,
-        student.collegeRollNo,
-        student.universityRollNo,
-        student.session,
-        student.phoneNumber,
-        student.currentSemester,
-        student.attendance);
-    data.push(newStudent);
-    window.localStorage.setItem('students', JSON.stringify(data));
-}
-
-
-export function RegisterStudent({ onSave }: { onSave: () => void }) {
+export function RegisterStudent({ onSave }: { onSave: (student: IStudent) => void }) {
     const form = useForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -74,9 +58,12 @@ export function RegisterStudent({ onSave }: { onSave: () => void }) {
         },
     })
 
-    function onSubmit(values: { name: string; email: string; collegeRollNo: number; universityRollNo: number; session: string; phoneNumber: string; currentSemester: string; attendance: string; }) {
-        registerStudent(values);
-        onSave();
+    function onSubmit(student: { name: string; email: string; collegeRollNo: number; universityRollNo: number; session: string; phoneNumber: string; currentSemester: string; attendance: string; }) {
+        const data: IStudent[] = JSON.parse(window.localStorage.getItem('students') || '[]') || [];
+        const newStudent = new Students(student.name, student.email, student.collegeRollNo, student.universityRollNo, student.session, student.phoneNumber, student.currentSemester, student.attendance);
+        data.push(newStudent);
+        window.localStorage.setItem('students', JSON.stringify(data));
+        onSave(newStudent);
     }
 
     return (
