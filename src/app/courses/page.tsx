@@ -41,7 +41,7 @@ import {
 import ActionButton, { Actions } from "@/components/re-useables/ActionButton/Page";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Course, ICourse } from "../model/course";
+import { Course, ICourse } from "../models/course";
 import { RegisterCourse } from "./add-course";
 import { UpdateCourse } from "./update-course";
 
@@ -70,7 +70,7 @@ export default function Courses() {
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = React.useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
-  const [courseBeingUpdating, setCourseBeingUpdating] = React.useState<Course>({ id: 0, title: "", teacher: "", courseCode: "" });
+  const [courseBeingUpdated, setCourseBeingUpdated] = React.useState<Course>({ id: 0, title: "", teacher: "", courseCode: "" });
   const [selectedForDeletion, setSelectedForDeletion] = React.useState<Course>({ id: 0, title: "", teacher: "", courseCode: "" });
 
   const columns: ColumnDef<ICourse>[] = [
@@ -146,7 +146,7 @@ export default function Courses() {
         const tableActions: Actions[] = [
           {
             key: "copy",
-            label: <>Copy Course Id</>,
+            label: <>Copy Course Code</>,
             onClick: () => {
               navigator.clipboard.writeText(course.courseCode.toString());
             },
@@ -164,7 +164,7 @@ export default function Courses() {
               </>
             ),
             onClick: () => {
-              setCourseBeingUpdating(course);
+              setCourseBeingUpdated(course);
               setIsUpdateModalOpen(true);
             },
           },
@@ -175,6 +175,7 @@ export default function Courses() {
                 <Trash2 /> Delete
               </>
             ),
+            variant: 'destructive',
             onClick: () => {
               setSelectedForDeletion(course);
               setIsDeleteModalOpen(true);
@@ -208,28 +209,36 @@ export default function Courses() {
   });
 
   const onCourseAdded = (newCourse: ICourse) => {
-    loadCourses();
+    setDataSource([...dataSource, newCourse]);
     setIsAddModalOpen(false);
     toast.success(
       `${newCourse.courseCode}: ${newCourse.title} is added successfully`
     );
   };
 
-  const onCourseUpdated = (updatedCourse: ICourse) => {
-    loadCourses();
+  const onCourseUpdated = (updatedCourse: ICourse | null) => {
+    if (!updatedCourse) {
+      toast.error("Something went wronge! Please try again.");
+    } else {
+      const updatedCourses = dataSource.map((course) =>
+        course.id === updatedCourse.id ? updatedCourse : course
+      );
+      setDataSource(updatedCourses);
+      toast.success(
+        `${updatedCourse.courseCode}: ${updatedCourse.title} is updated successfully`
+      );
+    }
     setIsUpdateModalOpen(false);
-    toast.success(
-      `${updatedCourse.courseCode}: ${updatedCourse.title} is updated successfully`
-    );
   };
 
-  const onDeleteCourse = (course: ICourse) => {
-    setDataSource(dataSource.filter(
-      (c: ICourse) => c.id !== course.id
-    ));
+  const onCourseDeleted = (course: ICourse) => {
+    const newDataSource = dataSource.filter(
+      (c: ICourse) => c !== course
+    )
+    setDataSource(newDataSource);
     window.localStorage.setItem(
       "courses",
-      JSON.stringify(dataSource)
+      JSON.stringify(newDataSource)
     );
     setIsDeleteModalOpen(false);
     toast.warning(`${course.title} deleted successfully!`);
@@ -376,7 +385,7 @@ export default function Courses() {
               Update course. Click submit when you&apos;re done.
             </DialogDescription>
           </DialogHeader>
-          <UpdateCourse course={courseBeingUpdating} onSave={onCourseUpdated} />
+          <UpdateCourse course={courseBeingUpdated} onSave={onCourseUpdated} />
         </DialogContent>
       </Dialog>
 
@@ -400,7 +409,7 @@ export default function Courses() {
               <CircleXIcon />
               Cancel
             </Button>{" "}
-            <Button onClick={() => onDeleteCourse(selectedForDeletion)} variant="destructive">
+            <Button onClick={() => onCourseDeleted(selectedForDeletion)} variant="destructive">
               <Trash2 />
               Delete
             </Button>

@@ -10,7 +10,7 @@ import { Column, ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, get
 import { ArrowUpDown, MoreHorizontal, SquarePen, Trash2 } from "lucide-react"
 import React, { useEffect, useState } from "react"
 import { toast } from "sonner"
-import { IStudent } from "../model/student"
+import { IStudent } from "../models/student"
 import { RegisterStudent } from "./add-student"
 import { UpdateStudent } from "./update-student"
 

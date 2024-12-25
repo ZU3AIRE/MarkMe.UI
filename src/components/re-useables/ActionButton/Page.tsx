@@ -13,6 +13,7 @@ import { DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 export interface Actions {
     label: ReactNode;
     key: string;
+    variant?: string;
     onClick: MouseEventHandler<HTMLDivElement>
 }
 
@@ -40,6 +41,7 @@ const ActionButton = ({ items }: ActionButtonProps) => {
                                 return (<DropdownMenuItem
                                     key={item.key}
                                     onClick={item.onClick}
+                                    className={(item.variant == 'destructive') ? 'text-red-500' : ''}
                                 >
                                     {item.label}
                                 </DropdownMenuItem>

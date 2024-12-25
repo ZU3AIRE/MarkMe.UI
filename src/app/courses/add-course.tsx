@@ -13,13 +13,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { ICourse, Course } from "../model/course";
+import { ICourse, Course } from "../models/course";
 
 export const formSchema = z.object({
   title: z.string().min(2, {
-    message: "Course title must be at least 4 characters long.",
+    message: "Course title must be at least 2 characters long.",
   }),
-  courseCode: z.string().min(4, {
+  courseCode: z.string().min(3, {
     message: "Course code must be at least 3 characters long.",
   }),
   teacher: z.string().min(4, {
@@ -45,7 +45,7 @@ export function RegisterCourse({ onSave }: { onSave: (courseAdded: ICourse) => v
     const newCourse = new Course(course.title, course.courseCode, course.teacher);
     data.push(newCourse);
     window.localStorage.setItem("courses", JSON.stringify(data));
-    onSave(course as unknown as ICourse);
+    onSave(newCourse);
   }
 
   return (
@@ -60,7 +60,7 @@ export function RegisterCourse({ onSave }: { onSave: (courseAdded: ICourse) => v
               <FormControl>
                 <Input
                   type="title"
-                  placeholder="Data Structures & Algorithms"
+                  placeholder="Lorem Ipsum"
                   {...field}
                 />
               </FormControl>
@@ -79,7 +79,7 @@ export function RegisterCourse({ onSave }: { onSave: (courseAdded: ICourse) => v
             <FormItem>
               <FormLabel>Course Code</FormLabel>
               <FormControl>
-                <Input type="text" placeholder="DC-323" {...field} />
+                <Input type="text" placeholder="AB-123" {...field} />
               </FormControl>
               <FormDescription>The course code for the course.</FormDescription>
               <FormMessage />
@@ -94,7 +94,7 @@ export function RegisterCourse({ onSave }: { onSave: (courseAdded: ICourse) => v
             <FormItem>
               <FormLabel>Professor Assigned</FormLabel>
               <FormControl>
-                <Input type="text" placeholder="Arham Irfan" {...field} />
+                <Input type="text" placeholder="John Doe" {...field} />
               </FormControl>
               <FormDescription>
                 The professor who will be teaching the course.

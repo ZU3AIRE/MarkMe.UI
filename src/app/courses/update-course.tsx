@@ -12,34 +12,35 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { ICourse } from "../model/course";
+import { ICourse } from "../models/course";
 import { formSchema } from "./add-course";
-
-const updateCourse = (course: ICourse, courseId: number) => {
-  const data: ICourse[] = JSON.parse(window.localStorage.getItem("courses") || "[]");
-  const foundCrsIndex = data.findIndex((crs) => crs.id === courseId);
-
-  if (foundCrsIndex !== -1) {
-    data[foundCrsIndex] = { ...data[foundCrsIndex], ...course };
-    window.localStorage.setItem("courses", JSON.stringify(data));
-  }
-};
 
 export function UpdateCourse({
   course,
   onSave,
 }: {
   course: ICourse;
-  onSave: (values: ICourse) => void;
+  onSave: (values: ICourse | null) => void;
 }) {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: course,
   });
 
+  const updateCourse = (course: ICourse, courseId: number) => {
+    const data: ICourse[] = JSON.parse(window.localStorage.getItem("courses") || "[]");
+    const foundCrsIndex = data.findIndex((crs) => crs.id === courseId);
+
+    if (foundCrsIndex !== -1) {
+      data[foundCrsIndex] = { ...data[foundCrsIndex], ...course };;
+      window.localStorage.setItem("courses", JSON.stringify(data));
+      return data[foundCrsIndex]
+    }
+    return null;
+  };
+
   function onSubmit(values: ICourse) {
-    updateCourse(values, course.id);
-    onSave(values);
+    onSave(updateCourse(values, course.id));
   }
   return (
       <Form {...form}>
