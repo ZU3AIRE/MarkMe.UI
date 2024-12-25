@@ -9,14 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -42,42 +34,45 @@ import {
 import {
   ArrowUpDown,
   CircleXIcon,
-  MoreHorizontal,
   SquarePen,
   Trash2,
-  TrashIcon
 } from "lucide-react";
 
+import ActionButton, { Actions } from "@/components/re-useables/ActionButton/Page";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ICourse } from "../model/course";
+import { Course, ICourse } from "../model/course";
 import { RegisterCourse } from "./add-course";
 import { UpdateCourse } from "./update-course";
 
+
 export default function Courses() {
-  useEffect(() => {
+  useEffect(() => loadCourses(), []);
+
+  // Initialize datasource
+  const loadCourses = () => {
     const courses =
       JSON.parse(window.localStorage.getItem("courses") || "[]") || [];
-    setData(courses);
-  }, []);
-  const updateCourses = () => {
-    const courses =
-      JSON.parse(window.localStorage.getItem("courses") || "[]") || [];
-    setData(courses);
+    setDataSource(courses);
   };
+
+  // Table Setup
+  const [dataSource, setDataSource] = useState<ICourse[]>([]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [rowSelection, setRowSelection] = React.useState({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
-
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
 
-  const [data, setData] = useState<ICourse[]>([]);
-  const [open, setOpen] = React.useState(false);
-  const [updateDialogOpen, setUpdateDialogOpen] = React.useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+  // Modal Open State Variables
+  const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = React.useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
+  const [courseBeingUpdating, setCourseBeingUpdating] = React.useState<Course>({ id: 0, title: "", teacher: "", courseCode: "" });
+  const [selectedForDeletion, setSelectedForDeletion] = React.useState<Course>({ id: 0, title: "", teacher: "", courseCode: "" });
+
   const columns: ColumnDef<ICourse>[] = [
     {
       id: "select",
@@ -107,16 +102,15 @@ export default function Courses() {
         return (
           <Button
             variant="ghost"
-            onClick={() =>
-              column.toggleSorting(column.getIsSorted() === "asc")
-            }>
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
             Course Title
             <ArrowUpDown />
           </Button>
         );
       },
       cell: ({ row }) => (
-        <div className="capitalize">{row.getValue("title")}</div>
+        <div className="capitalize ml-4">{row.getValue("title")}</div>
       ),
     },
     {
@@ -125,9 +119,8 @@ export default function Courses() {
         return (
           <Button
             variant="ghost"
-            onClick={() =>
-              column.toggleSorting(column.getIsSorted() === "asc")
-            }>
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
             Teacher
             <ArrowUpDown />
           </Button>
@@ -139,118 +132,64 @@ export default function Courses() {
     },
     {
       accessorKey: "courseCode",
-      header: () => <div className="text-right">Course Code</div>,
+      header: () => <div>Course Code</div>,
       cell: ({ row }) => {
-        return (
-          <div className="text-right font-medium">
-            {row.getValue("courseCode")}
-          </div>
-        );
+        return <div>{row.getValue("courseCode")}</div>;
       },
     },
     {
       id: "actions",
+      header: "Actions",
       enableHiding: false,
       cell: ({ row }) => {
         const course = row.original;
-        const deleteCourse = (course: ICourse) => {
-          const courses =
-            JSON.parse(window.localStorage.getItem("courses") || "[]") || [];
-          const updatedCourses = courses.filter(
-            (c: ICourse) => c.id !== course.id
-          );
-          window.localStorage.setItem(
-            "courses",
-            JSON.stringify(updatedCourses)
-          );
-          setData(updatedCourses);
-          setDeleteDialogOpen(false);
-          toast.warning(`${course.title} deleted successfully!`);
-        };
-        const handleCloseDialog = () => {
-          updateCourses();
-          setUpdateDialogOpen(false);
-          toast.success(`${course.title} updated successfully!`);
-        };
+        const tableActions: Actions[] = [
+          {
+            key: "copy",
+            label: <>Copy Course Id</>,
+            onClick: () => {
+              navigator.clipboard.writeText(course.courseCode.toString());
+            },
+          },
+          {
+            key: "separator",
+            label: "",
+            onClick: () => { },
+          },
+          {
+            key: "edit",
+            label: (
+              <>
+                <SquarePen /> Edit
+              </>
+            ),
+            onClick: () => {
+              setCourseBeingUpdating(course);
+              setIsUpdateModalOpen(true);
+            },
+          },
+          {
+            key: "delete",
+            label: (
+              <>
+                <Trash2 /> Delete
+              </>
+            ),
+            onClick: () => {
+              setSelectedForDeletion(course);
+              setIsDeleteModalOpen(true);
+            },
+          },
+        ];
         return (
-          <>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <span className="sr-only">Open menu</span>
-                  <MoreHorizontal />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem
-                  onClick={() =>
-                    navigator.clipboard.writeText(course.courseCode.toString())
-                  }>
-                  Copy Course ID
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => setUpdateDialogOpen(true)}
-                  className="text-gray-600">
-                  <SquarePen /> Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setDeleteDialogOpen(true)}
-                  className="text-red-500">
-                  <Trash2 /> Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            {/* Update Course Data Dialog */}
-            <Dialog open={updateDialogOpen} onOpenChange={setUpdateDialogOpen}>
-              <DialogContent className="lg:max-w-[40vw] max-h-[65vh] overflow-y-auto p-6 rounded-lg shadow-lg">
-                <DialogHeader>
-                  <DialogTitle>Update Course</DialogTitle>
-                  <DialogDescription>
-                    Update course. Click submit when you&apos;re done.
-                  </DialogDescription>
-                </DialogHeader>
-                <UpdateCourse courseId={course.id} onSave={handleCloseDialog} />
-              </DialogContent>
-            </Dialog>
-            {/* Delete Confirm Dialog */}
-            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-              <DialogContent className="lg:max-w-[30vw] max-h-[65vh] overflow-y-auto p-6 rounded-lg shadow-lg">
-                <DialogHeader>
-                  <DialogTitle>Are you sure you want to delete</DialogTitle>
-                  <DialogDescription>
-                    <span className="mt-3 mb-3 border-l-2 pl-3 italic">
-                      <span className="font-semibold">
-                        {course.courseCode}: {course.title}
-                      </span>
-                      {course.teacher ? ` taught by ${course.teacher}` : ""}
-                      {`?`}
-                    </span>
-                  </DialogDescription>
-                </DialogHeader>
-                <footer className="text-end h-8">
-                  <Button onClick={() => setDeleteDialogOpen(false)}>
-                    <CircleXIcon />
-                    Cancel
-                  </Button>{" "}
-                  <Button
-                    onClick={() => deleteCourse(course)}
-                    variant="destructive">
-                    <TrashIcon />
-                    Delete
-                  </Button>
-                </footer>
-              </DialogContent>
-            </Dialog>
-          </>
+          <ActionButton items={tableActions} ></ActionButton>
         );
       },
     },
   ];
 
   const table = useReactTable({
-    data,
+    data: dataSource,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -268,139 +207,206 @@ export default function Courses() {
     },
   });
 
-  const handleCloseDialog = () => {
-    const courses =
-      JSON.parse(window.localStorage.getItem("courses") || "[]") || [];
-    setData(courses);
-    setOpen(false);
-    const newCourse = courses[courses.length - 1];
+  const onCourseAdded = (newCourse: ICourse) => {
+    loadCourses();
+    setIsAddModalOpen(false);
     toast.success(
       `${newCourse.courseCode}: ${newCourse.title} is added successfully`
     );
   };
 
+  const onCourseUpdated = (updatedCourse: ICourse) => {
+    loadCourses();
+    setIsUpdateModalOpen(false);
+    toast.success(
+      `${updatedCourse.courseCode}: ${updatedCourse.title} is updated successfully`
+    );
+  };
+
+  const onDeleteCourse = (course: ICourse) => {
+    setDataSource(dataSource.filter(
+      (c: ICourse) => c.id !== course.id
+    ));
+    window.localStorage.setItem(
+      "courses",
+      JSON.stringify(dataSource)
+    );
+    setIsDeleteModalOpen(false);
+    toast.warning(`${course.title} deleted successfully!`);
+  };
+
   return (
-    <div className="pe-4 ps-8">
-      <div className="flex items-center justify-between py-4">
-        <h1 className="text-2xl font-semibold">Courses</h1>
-        <Button onClick={() => setOpen(true)} variant="outline">
-          Add course
-        </Button>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="lg:max-w-[40vw] max-h-[65vh] overflow-y-auto p-6 rounded-lg shadow-lg">
-            <DialogHeader>
-              <DialogTitle>Add Course</DialogTitle>
-              <DialogDescription>
-                Add course. Click submit when you&apos;re done.
-              </DialogDescription>
-            </DialogHeader>
-            <RegisterCourse onSave={handleCloseDialog} />
-          </DialogContent>
-        </Dialog>
-      </div>
-      <div className="flex items-center py-4">
-        <Input
-          placeholder="Filter courses..."
-          value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("title")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-        <div className="ml-auto">
-          <SmartSelect
-            items={table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column: Column<ICourse>) => {
-                return {
-                  key: column.id,
-                  label: column.id,
-                  isChecked: column.getIsVisible(),
-                };
-              })}
-            onCheckedChange={(item, value) =>
-              table
+    <>
+      <div className="pe-4 ps-8">
+        <div className="flex items-center justify-between py-4">
+          <h1 className="text-2xl font-semibold">Courses</h1>
+          <Button onClick={() => setIsAddModalOpen(true)} variant="outline">
+            Add course
+          </Button>
+        </div>
+        <div className="flex items-center py-4">
+          <Input
+            placeholder="Filter courses..."
+            value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              table.getColumn("title")?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm"
+          />
+          <div className="ml-auto">
+            <SmartSelect
+              items={table
                 .getAllColumns()
                 .filter((column) => column.getCanHide())
-                .find((coulmn) => coulmn.id == item.key)
-                ?.toggleVisibility(!!value)
-            }
-            title="Columns"
-            variant={"outline"}
-            key={"id"}></SmartSelect>
+                .map((column: Column<ICourse>) => {
+                  return {
+                    key: column.id,
+                    label: column.id,
+                    isChecked: column.getIsVisible(),
+                  };
+                })}
+              onCheckedChange={(item, value) =>
+                table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .find((coulmn) => coulmn.id == item.key)
+                  ?.toggleVisibility(!!value)
+              }
+              title="Columns"
+              variant={"outline"}
+              key={"id"}
+            ></SmartSelect>
+          </div>
         </div>
-      </div>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
                             header.column.columnDef.header,
                             header.getContext()
                           )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
+                      </TableHead>
+                    );
+                  })}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center">
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </div>
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}>
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}>
-            Next
-          </Button>
+        <div className="flex items-center justify-end space-x-2 py-4">
+          <div className="flex-1 text-sm text-muted-foreground">
+            {table.getFilteredSelectedRowModel().rows.length} of{" "}
+            {table.getFilteredRowModel().rows.length} row(s) selected.
+          </div>
+          <div className="space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Add Course Dialog */}
+      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+        <DialogContent className="lg:max-w-[40vw] max-h-[65vh] overflow-y-auto p-6 rounded-lg shadow-lg">
+          <DialogHeader>
+            <DialogTitle>Add Course</DialogTitle>
+            <DialogDescription>
+              Add course. Click submit when you&apos;re done.
+            </DialogDescription>
+          </DialogHeader>
+          <RegisterCourse onSave={onCourseAdded} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Update Course Dialog */}
+      <Dialog open={isUpdateModalOpen} onOpenChange={setIsUpdateModalOpen}>
+        <DialogContent className="lg:max-w-[40vw] max-h-[65vh] overflow-y-auto p-6 rounded-lg shadow-lg">
+          <DialogHeader>
+            <DialogTitle>Update Course</DialogTitle>
+            <DialogDescription>
+              Update course. Click submit when you&apos;re done.
+            </DialogDescription>
+          </DialogHeader>
+          <UpdateCourse course={courseBeingUpdating} onSave={onCourseUpdated} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirm Dialog */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent className="lg:max-w-[30vw] max-h-[65vh] overflow-y-auto p-6 rounded-lg shadow-lg">
+          <DialogHeader>
+            <DialogTitle>Are you sure you want to delete</DialogTitle>
+            <DialogDescription>
+              <span className="mt-3 mb-3 border-l-2 pl-3 italic">
+                <span className="font-semibold">
+                  {selectedForDeletion.courseCode}: {selectedForDeletion.title}
+                </span>
+                {selectedForDeletion.teacher ? ` taught by ${selectedForDeletion.teacher}` : ""}
+                {`?`}
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <footer className="text-end h-8">
+            <Button onClick={() => setIsDeleteModalOpen(false)}>
+              <CircleXIcon />
+              Cancel
+            </Button>{" "}
+            <Button onClick={() => onDeleteCourse(selectedForDeletion)} variant="destructive">
+              <Trash2 />
+              Delete
+            </Button>
+          </footer>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

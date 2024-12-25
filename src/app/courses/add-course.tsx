@@ -33,23 +33,19 @@ export const defaultValues = {
   courseCode: "",
 }
 
-const registerCourse = (course: { title: string; teacher: string; courseCode: string; }) => {
-  const data: ICourse[] =
-    JSON.parse(window.localStorage.getItem("courses") || "[]") || [];
-  const newCourse = new Course(course.title, course.courseCode, course.teacher);
-  data.push(newCourse);
-  window.localStorage.setItem("courses", JSON.stringify(data));
-};
-
-export function RegisterCourse({ onSave }: { onSave: () => void }) {
+export function RegisterCourse({ onSave }: { onSave: (courseAdded: ICourse) => void }) {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
 
-  function onSubmit(values: { title: string; teacher: string; courseCode: string; }) {
-    registerCourse(values);
-    onSave();
+  function onSubmit(course: { title: string; teacher: string; courseCode: string; }) {
+    const data: ICourse[] =
+      JSON.parse(window.localStorage.getItem("courses") || "[]") || [];
+    const newCourse = new Course(course.title, course.courseCode, course.teacher);
+    data.push(newCourse);
+    window.localStorage.setItem("courses", JSON.stringify(data));
+    onSave(course as unknown as ICourse);
   }
 
   return (
