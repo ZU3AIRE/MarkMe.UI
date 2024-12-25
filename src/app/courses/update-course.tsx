@@ -12,18 +12,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { ICourse } from "../model/course";
+import { ICourse } from "../models/course";
 import { formSchema } from "./add-course";
 
-const updateCourse = (course: ICourse, courseId: number) => {
-  const data: ICourse[] = JSON.parse(window.localStorage.getItem("courses") || "[]");
-  const foundCrsIndex = data.findIndex((crs) => crs.id === courseId);
-
-  if (foundCrsIndex !== -1) {
-    data[foundCrsIndex] = { ...data[foundCrsIndex], ...course };
-    window.localStorage.setItem("courses", JSON.stringify(data));
-  }
-};
 
 export function UpdateCourse({
   course,
@@ -36,6 +27,16 @@ export function UpdateCourse({
     resolver: zodResolver(formSchema),
     defaultValues: course,
   });
+
+  const updateCourse = (course: ICourse, courseId: number) => {
+    const data: ICourse[] = JSON.parse(window.localStorage.getItem("courses") || "[]");
+    const foundCrsIndex = data.findIndex((crs) => crs.id === courseId);
+
+    if (foundCrsIndex !== -1) {
+      data[foundCrsIndex] = { ...data[foundCrsIndex], ...course };
+      window.localStorage.setItem("courses", JSON.stringify(data));
+    }
+  };
 
   function onSubmit(values: ICourse) {
     updateCourse(values, course.id);

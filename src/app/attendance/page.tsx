@@ -36,7 +36,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { IAttendance } from '../model/attendance'
+import { IAttendance } from '../models/attendance'
 
 
 
