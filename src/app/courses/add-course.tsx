@@ -45,7 +45,7 @@ export function RegisterCourse({ onSave }: { onSave: (courseAdded: ICourse) => v
     const newCourse = new Course(course.title, course.courseCode, course.teacher);
     data.push(newCourse);
     window.localStorage.setItem("courses", JSON.stringify(data));
-    onSave(course as unknown as ICourse);
+    onSave(newCourse);
   }
 
   return (
