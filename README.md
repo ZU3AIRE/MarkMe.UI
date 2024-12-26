@@ -1,33 +1,29 @@
 ## Development Setup
 
-First, clone the repo by using the following command:
+#### Clone the repo by using the following command:
 
 ```bash
 git clone https://github.com/ZU3AIRE/mark-me.git 
 ```
-
 The stable branch is main:
-
 ```bash
 git checkout main
-
 ```
-second, run the following command to install the dependencies:
-
+#### Run the following command to install the dependencies:
 ```bash
 npm install
 ```
-
-third, run the development server:
-
+#### Create `.env.local` file in the root of the directory
+Add the keys from the [Clerk](https://clerk.com/)
+```
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=********************************
+CLERK_SECRET_KEY=********************************
+```
+#### Run the development server:
 ```bash
 npm run dev
-
 ```
-
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-
 ## Steps For PR Review
 
 First, stiwtch to the specified branch according to the PR or clone the specified branch.

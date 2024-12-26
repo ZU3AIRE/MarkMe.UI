@@ -1,7 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { z } from "zod"
-
 import { Button } from "@/components/ui/button"
 import {
     Form,
@@ -13,78 +11,36 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { IStudent } from "../model/student"
+import { IStudent } from "../models/student"
+import { formSchema } from "./add-student"
 
-
-const formSchema = z.object({
-    name: z.string().min(2, {
-        message: "Username must be at least 2 characters.",
-    }),
-    email: z.string().min(1, {
-        message: "You must give an email address",
-    }).email("This is not a valid email address"),
-    collegeRollNo: z
-        .number()
-        .positive({ message: "The college roll no can't be negative or zero." }),
-    universityRollNo: z
-        .number()
-        .positive({ message: "The university roll can't be negative or zero." }),
-    session: z.string().min(4, {
-        message: "You must give a session",
-    }),
-    phoneNumber: z.string().min(11, {
-        message: "You must give a phone number",
-    }),
-    currentSemester: z.string().min(1, {
-        message: "You must give a current semester",
-    }),
-    attendance: z.string().min(1, {
-        message: "You must give an attendance",
-    }),
-})
-
-const updateStudent = (student: { name: string | undefined; email: string | undefined; collegeRollNo: number | undefined; universityRollNo: number | undefined; session: string | undefined; phoneNumber: string | undefined; currentSemester: string | undefined; attendance: string | undefined; }, studentId: number) => {
-    const data: IStudent[] = JSON.parse(window.localStorage.getItem('students') || '[]') || [];
-    const std = data.find((std) => std.id === studentId);
-    const stdIndex = data.findIndex((std) => std.id === studentId);
-    if (std) {
-        std.name = student.name!;
-        std.email = student.email!;
-        std.collegeRollNo = student.collegeRollNo ?? 0;
-        std.universityRollNo = student.universityRollNo ?? 0;
-        std.session = student.session!;
-        std.phoneNumber = student.phoneNumber!;
-        std.currentSemester = student.currentSemester!;
-        std.attendance = student.attendance!;
-    }
-    if (stdIndex !== -1 && std) {
-        data[stdIndex] = std;
-        window.localStorage.setItem('students', JSON.stringify(data));
-    }
-}
-
-
-export function UpdateStudent({ studentId, onSave }: { studentId: number; onSave: () => void }) {
-    const data: IStudent[] = JSON.parse(window.localStorage.getItem('students') || '[]') || [];
-    const student = data.find((student) => student.id === studentId);
+export function UpdateStudent({
+    student,
+    onSave
+}: {
+    student: IStudent;
+    onSave: (student: IStudent | null) => void;
+}) {
     const form = useForm({
         resolver: zodResolver(formSchema),
-        defaultValues: {
-            name: student?.name,
-            email: student?.email,
-            collegeRollNo: student?.collegeRollNo,
-            universityRollNo: student?.universityRollNo,
-            session: student?.session,
-            phoneNumber: student?.phoneNumber,
-            currentSemester: student?.currentSemester,
-            attendance: student?.attendance,
-        },
+        defaultValues: student,
     })
 
-    function onSubmit(values: { name: string | undefined; email: string | undefined; collegeRollNo: number | undefined; universityRollNo: number | undefined; session: string | undefined; phoneNumber: string | undefined; currentSemester: string | undefined; attendance: string | undefined; }) {
-        updateStudent(values, studentId);
-        onSave();
+    const updateStudent = (student: IStudent, studentId: number) => {
+        const data: IStudent[] = JSON.parse(window.localStorage.getItem('students') || '[]') || [];
+        const stdIndex = data.findIndex((std) => std.id === studentId);
+        if (stdIndex !== -1) {
+            data[stdIndex] = { ...data[stdIndex], ...student };;
+            window.localStorage.setItem("students", JSON.stringify(data));
+            return data[stdIndex]
+        }
+        return null;
     }
+
+    function onSubmit(values: IStudent) {
+        onSave(updateStudent(values, student.id));
+    }
+
 
     return (
         <Form {...form}>
