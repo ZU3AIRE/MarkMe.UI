@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input"
 import { IStudent, Students } from "../models/student"
 
 
-const formSchema = z.object({
+export const formSchema = z.object({
     name: z.string().min(2, {
         message: "Username must be at least 2 characters.",
     }),

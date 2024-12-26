@@ -1,7 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { z } from "zod"
-
 import { Button } from "@/components/ui/button"
 import {
     Form,
@@ -14,35 +12,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { IStudent } from "../models/student"
-
-
-const formSchema = z.object({
-    name: z.string().min(2, {
-        message: "Username must be at least 2 characters.",
-    }),
-    email: z.string().min(1, {
-        message: "You must give an email address",
-    }).email("This is not a valid email address"),
-    collegeRollNo: z
-        .number()
-        .positive({ message: "The college roll no can't be negative or zero." }),
-    universityRollNo: z
-        .number()
-        .positive({ message: "The university roll can't be negative or zero." }),
-    session: z.string().min(4, {
-        message: "You must give a session",
-    }),
-    phoneNumber: z.string().min(11, {
-        message: "You must give a phone number",
-    }),
-    currentSemester: z.string().min(1, {
-        message: "You must give a current semester",
-    }),
-    attendance: z.string().min(1, {
-        message: "You must give an attendance",
-    }),
-})
-
+import { formSchema } from "./add-student"
 
 export function UpdateStudent({
     student,
