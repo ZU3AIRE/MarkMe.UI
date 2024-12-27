@@ -7,10 +7,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Column, ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, SortingState, useReactTable, VisibilityState } from "@tanstack/react-table"
-import { ArrowUpDown, SquarePen, Trash2 } from "lucide-react"
+import { ArrowUpDown, CircleXIcon, SquarePen, Trash2 } from "lucide-react"
 import React, { useEffect, useState } from "react"
 import { toast } from "sonner"
-import { IStudent, Students } from "../models/student"
+import { IStudent, Student } from "../models/student"
 import { RegisterStudent } from "./add-student"
 import { UpdateStudent } from "./update-student"
 
@@ -37,7 +37,9 @@ export default function StudentsComp() {
     // Modal Open State Variables
     const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = React.useState(false);
-    const [studentBeingUpdated, setStudentBeingUpdated] = React.useState<Students>({ id: 0, name: "", collegeRollNo: 0, universityRollNo: 0, session: "", currentSemester: "", attendance: "", email: "", phoneNumber: "" });
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
+    const [studentBeingUpdated, setStudentBeingUpdated] = React.useState<Student>({ id: 0, name: "", collegeRollNo: 0, universityRollNo: 0, session: "", currentSemester: "", attendance: "", email: "", phoneNumber: "" });
+    const [selectedForDeletion, setSelectedStudentForDeletion] = React.useState<Student>({ id: 0, name: "", collegeRollNo: 0, universityRollNo: 0, session: "", currentSemester: "", attendance: "", email: "", phoneNumber: "" });
 
     const columns: ColumnDef<IStudent>[] = [
         {
@@ -206,6 +208,8 @@ export default function StudentsComp() {
                         ),
                         variant: 'destructive',
                         onClick: () => {
+                            setSelectedStudentForDeletion(student);
+                            setIsDeleteModalOpen(true);
                         },
                     },
                 ];
@@ -252,11 +256,29 @@ export default function StudentsComp() {
             );
             setDataSource(updatedStudents);
             toast.success(
-                `${updatedStudent.name} is updated successfully`
+                `${updatedStudent.name} is updated successfully!`
             );
         }
         setIsUpdateModalOpen(false);
     };
+
+    const onStudentDeleted = (deleteStudent: IStudent | null) => {
+        if (!deleteStudent) {
+            toast.error("Something went wronge! Please try again.");
+        } else {
+            debugger;
+            const newDataSource = dataSource.filter((student) => student.id !== deleteStudent.id);
+            setDataSource(newDataSource);
+            window.localStorage.setItem(
+                "students",
+                JSON.stringify(newDataSource)
+            );
+            toast.warning(
+                `${deleteStudent.name} is deleted successfully!`
+            );
+        }
+        setIsDeleteModalOpen(false);
+    }
     return (
         <>
             <div className="pe-4 ps-8">
@@ -398,6 +420,32 @@ export default function StudentsComp() {
                         </DialogDescription>
                     </DialogHeader>
                     <UpdateStudent student={studentBeingUpdated} onSave={onStudentUpdated} />
+                </DialogContent>
+            </Dialog>
+
+            {/* Delete Student Dialog */}
+            <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+                <DialogContent className="lg:max-w-[30vw] max-h-[65vh] overflow-y-auto p-6 rounded-lg shadow-lg">
+                    <DialogHeader>
+                        <DialogTitle>Are you sure you want to delete</DialogTitle>
+                        <DialogDescription>
+                            <span className="mt-3 mb-3 border-l-2 pl-3 italic">
+                                <span className="font-semibold">
+                                    {selectedForDeletion.name}: Roll No {selectedForDeletion.collegeRollNo} {`?`}
+                                </span>
+                            </span>
+                        </DialogDescription>
+                    </DialogHeader>
+                    <footer className="text-end h-8">
+                        <Button onClick={() => setIsDeleteModalOpen(false)}>
+                            <CircleXIcon />
+                            Cancel
+                        </Button>{" "}
+                        <Button onClick={() => onStudentDeleted(selectedForDeletion)} variant="destructive">
+                            <Trash2 />
+                            Delete
+                        </Button>
+                    </footer>
                 </DialogContent>
             </Dialog>
         </>

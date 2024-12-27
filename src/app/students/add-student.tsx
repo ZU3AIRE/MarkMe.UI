@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-
 import { Button } from "@/components/ui/button"
 import {
     Form,
@@ -13,8 +12,7 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { IStudent, Students } from "../models/student"
-
+import { IStudent, Student } from "../models/student"
 
 export const formSchema = z.object({
     name: z.string().min(2, {
@@ -41,26 +39,27 @@ export const formSchema = z.object({
     attendance: z.string().min(1, {
         message: "You must give an attendance",
     }),
-})
+});
+const defaultValues = {
+    name: "",
+    email: "",
+    collegeRollNo: 0,
+    universityRollNo: 0,
+    session: "",
+    phoneNumber: "",
+    currentSemester: "",
+    attendance: "",
+};
 
 export function RegisterStudent({ onSave }: { onSave: (student: IStudent) => void }) {
     const form = useForm({
         resolver: zodResolver(formSchema),
-        defaultValues: {
-            name: "",
-            email: "",
-            collegeRollNo: 0,
-            universityRollNo: 0,
-            session: "",
-            phoneNumber: "",
-            currentSemester: "",
-            attendance: "",
-        },
-    })
+        defaultValues: defaultValues,
+    });
 
     function onSubmit(student: { name: string; email: string; collegeRollNo: number; universityRollNo: number; session: string; phoneNumber: string; currentSemester: string; attendance: string; }) {
         const data: IStudent[] = JSON.parse(window.localStorage.getItem('students') || '[]') || [];
-        const newStudent = new Students(student.name, student.email, student.collegeRollNo, student.universityRollNo, student.session, student.phoneNumber, student.currentSemester, student.attendance);
+        const newStudent = new Student(student.name, student.email, student.collegeRollNo, student.universityRollNo, student.session, student.phoneNumber, student.currentSemester, student.attendance);
         data.push(newStudent);
         window.localStorage.setItem('students', JSON.stringify(data));
         onSave(newStudent);
