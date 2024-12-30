@@ -32,29 +32,24 @@ import {
     VisibilityState,
 } from "@tanstack/react-table";
 import {
+    ArrowLeftIcon,
     ArrowUpDown,
     CircleXIcon,
+    PlusCircleIcon,
+    PlusIcon,
     SquarePen,
     Trash2,
 } from "lucide-react";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
-import { Course, ICourse } from "../models/course";
+import { Course, DEFAULT_COURSE } from "../../app/models/course";
 import Link from "next/link";
-import { getCourses } from "@/lib/localstorage";
+import { Badge } from "@/components/ui/badge";
+import { redirect } from "next/navigation";
 
-export default function MainGrid() {
-    useEffect(() => loadCourses(), []);
-
-    // Initialize datasource
-    const loadCourses = () => {
-        const courses = getCourses();
-        setDataSource(courses);
-    };
-
+export default function CourseGrid({ courses }: { courses: Course[] }) {
     // Table Setup
-    const [dataSource, setDataSource] = useState<ICourse[]>([]);
     const [sorting, setSorting] = useState<SortingState>([]);
     const [rowSelection, setRowSelection] = useState({});
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
@@ -65,9 +60,9 @@ export default function MainGrid() {
 
     // Modal Open State Variables
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [selectedForDeletion, setSelectedForDeletion] = useState<Course>({ id: 0, title: "", teacher: "", courseCode: "" });
+    const [selectedForDeletion, setSelectedForDeletion] = useState<Course>(DEFAULT_COURSE);
 
-    const columns: ColumnDef<ICourse>[] = [
+    const columns: ColumnDef<Course>[] = [
         {
             id: "select",
             header: ({ table }) => (
@@ -132,6 +127,29 @@ export default function MainGrid() {
             },
         },
         {
+            accessorKey: "courseType",
+            header: () => <div>Course Type</div>,
+            cell: ({ row }) => {
+                return row.getValue("courseType")!.toString() == Course.types.MAJOR ?
+                    <Badge variant="outline" className="font-normal" >MAJOR</Badge> :
+                    <Badge variant="outline" className="font-normal">MINOR</Badge>
+            },
+        },
+        {
+            accessorKey: "creditHours",
+            header: () => <div>Credit Hours</div>,
+            cell: ({ row }) => {
+                return <div>{row.getValue("creditHours")}</div>;
+            },
+        },
+        {
+            accessorKey: "creditHoursPerWeek",
+            header: () => <div>Credit Hours/Week</div>,
+            cell: ({ row }) => {
+                return <div>{row.getValue("creditHoursPerWeek")}</div>;
+            },
+        },
+        {
             id: "actions",
             header: "Actions",
             enableHiding: false,
@@ -154,11 +172,12 @@ export default function MainGrid() {
                         key: "edit",
                         label: (
                             <>
-                                <Link href={`/courses/update/${course.id}`}>
-                                    <SquarePen /> Edit
-                                </Link>
+                                <SquarePen /> Edit
                             </>
                         ),
+                        onClick: () => {
+                            redirect(`/courses/update/${course.id}`);
+                        }
                     },
                     {
                         key: "delete",
@@ -182,7 +201,7 @@ export default function MainGrid() {
     ];
 
     const table = useReactTable({
-        data: dataSource,
+        data: courses,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -200,21 +219,23 @@ export default function MainGrid() {
         },
     });
 
-    const onCourseDeleted = (course: ICourse) => {
-        const newDataSource = dataSource.filter(
-            (c: ICourse) => c !== course
-        )
-        setDataSource(newDataSource);
-        window.localStorage.setItem(
-            "courses",
-            JSON.stringify(newDataSource)
-        );
+    const onCourseDeleted = (course: Course) => {
         setIsDeleteModalOpen(false);
         toast.warning(`${course.title} deleted successfully!`);
     };
 
     return (
         <>
+            <div className="flex items-center justify-between py-4">
+                <h1 className="text-2xl font-semibold">
+                    Courses
+                </h1>
+                <Link href="/courses/new">
+                    <Button variant="outline">
+                        <PlusIcon />  Add
+                    </Button>
+                </Link>
+            </div>
             <div className="flex items-center py-4">
                 <Input
                     placeholder="Filter courses..."
@@ -229,7 +250,7 @@ export default function MainGrid() {
                         items={table
                             .getAllColumns()
                             .filter((column) => column.getCanHide())
-                            .map((column: Column<ICourse>) => {
+                            .map((column: Column<Course>) => {
                                 return {
                                     key: column.id,
                                     label: column.id,
