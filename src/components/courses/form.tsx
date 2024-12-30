@@ -89,7 +89,7 @@ export function CourseForm({
                         </Select>
                     </div>
                     <div>
-                        <Label htmlFor="teacher">Teacher's Name</Label>
+                        <Label htmlFor="teacher">Teacher&apos;s Name</Label>
                         <Input
                             type="text"
                             name="teacher"

@@ -10,12 +10,15 @@ export const metadata: Metadata = {
 export default function RegisterCourse() {
 
   return (
-      <CourseForm formData={DEFAULT_COURSE} action={onAdd} />
+    <CourseForm formData={DEFAULT_COURSE} action={onAdd} />
   );
 }
 
 export const onAdd = async (prevState: { error: string[] }, formData: FormData) => {
   "use server"
+  if (prevState) return prevState;
+  if (formData) return prevState;
+
   await new Promise<Course>(resolve => setTimeout(resolve, 2000));
   redirect('/courses');
 }

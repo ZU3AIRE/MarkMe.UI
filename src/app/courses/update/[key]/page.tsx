@@ -16,7 +16,7 @@ export default async function UpdateCoursePage({ params }: { params: Promise<{ k
   ];
 
   // Load Course from backend
-  const course = await new Promise<Course>(resolve => setTimeout(() => { resolve(courses.find(x => x.id == key)!), 10000 }));
+  const course = await new Promise<Course>(resolve => setTimeout(() => { resolve(courses.find(x => x.id == key)!)}, 4000));
 
   return (
     <CourseForm formData={{ ...course }} action={onUpdate} />
@@ -25,6 +25,9 @@ export default async function UpdateCoursePage({ params }: { params: Promise<{ k
 
 export const onUpdate = async (prevState: { error: string[] }, formData: FormData) => {
   "use server"
+  if(prevState) return prevState;
+  if(formData) return prevState;
+
   await new Promise<Course>(resolve => setTimeout(resolve, 2000));
   redirect('/courses');
 }

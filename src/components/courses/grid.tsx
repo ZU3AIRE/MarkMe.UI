@@ -1,5 +1,5 @@
 "use client";
-import { SmartSelect, ActionButton, Actions } from "@/components/re-useables";
+import { ActionButton, Actions, SmartSelect } from "@/components/re-useables";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -32,21 +32,19 @@ import {
     VisibilityState,
 } from "@tanstack/react-table";
 import {
-    ArrowLeftIcon,
     ArrowUpDown,
     CircleXIcon,
-    PlusCircleIcon,
     PlusIcon,
     SquarePen,
-    Trash2,
+    Trash2
 } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Course, DEFAULT_COURSE } from "../../app/models/course";
-import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { redirect } from "next/navigation";
 
 export default function CourseGrid({ courses }: { courses: Course[] }) {
     // Table Setup
