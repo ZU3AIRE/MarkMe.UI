@@ -1,6 +1,11 @@
 import { Course } from "@/app/models/course";
 import { redirect } from "next/navigation";
 import { CourseForm } from "../../../../components/courses/form";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Update - Course"
+};
 
 export default async function UpdateCoursePage({ params }: { params: Promise<{ key: number }> }) {
   const key = (await params).key;
