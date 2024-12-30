@@ -27,7 +27,7 @@ import {
 import { ArrowUpDown } from "lucide-react"
 import React, { useState } from "react"
 
-import SmartSelect from "@/components/re-useables/SmartSelect/page"
+import { SmartSelect } from "@/components/re-useables"
 import {
     Table,
     TableBody,
@@ -37,11 +37,6 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { IAttendance } from '../models/attendance'
-
-
-
-
-
 
 const courses = [
     { key: "2125 - Data Structures & Algorithms", value: "2125 - Data Structures & Algorithms" },
@@ -108,7 +103,7 @@ export default function MarkAttendance() {
     ]
     const dateString = getTodaysDate()
     const [date, setDate] = React.useState<Date | undefined>(new Date())
-    const [data ] = useState<IAttendance[]>([]);
+    const [data] = useState<IAttendance[]>([]);
 
 
     const [sorting, setSorting] = React.useState<SortingState>([])

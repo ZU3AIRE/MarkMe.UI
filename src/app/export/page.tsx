@@ -1,5 +1,5 @@
 'use client'
-import SmartSelect from "@/components/re-useables/SmartSelect/page"
+import { SmartSelect } from "@/components/re-useables"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -104,13 +104,13 @@ export default function Export() {
             header: () => <div className="text-right">Amount</div>,
             cell: ({ row }) => {
                 const amount = parseFloat(row.getValue("amount"))
-    
+
                 // Format the amount as a dollar amount
                 const formatted = new Intl.NumberFormat("en-US", {
                     style: "currency",
                     currency: "USD",
                 }).format(amount)
-    
+
                 return <div className="text-right font-medium">{formatted}</div>
             },
         },
@@ -119,7 +119,7 @@ export default function Export() {
             enableHiding: false,
             cell: ({ row }) => {
                 const payment = row.original
-    
+
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -181,24 +181,24 @@ export default function Export() {
                     <SmartSelect
                         items={
                             table
-                            .getAllColumns()
-                            .filter((column) => column.getCanHide())
-                            .map((column: Column<Payment>) => {
-                                return {
-                                    key: column.id,
-                                    label: column.id,
-                                    isChecked: column.getIsVisible()
-                                }
-                            })}
-                            onCheckedChange={(item, checked) => 
-                                table
+                                .getAllColumns()
+                                .filter((column) => column.getCanHide())
+                                .map((column: Column<Payment>) => {
+                                    return {
+                                        key: column.id,
+                                        label: column.id,
+                                        isChecked: column.getIsVisible()
+                                    }
+                                })}
+                        onCheckedChange={(item, checked) =>
+                            table
                                 .getAllColumns()
                                 .filter((column) => column.getCanHide()).find(column => column.id == item.key)?.toggleVisibility(!!checked)
-                            }
-                            title="Columns"
-                            variant={'outline'}
-                            key={'id'}
-                            >
+                        }
+                        title="Columns"
+                        variant={'outline'}
+                        key={'id'}
+                    >
                     </SmartSelect>
                 </div>
             </div>
