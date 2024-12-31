@@ -1,20 +1,28 @@
-export interface ICourse {
+export type Course = {
   id: number;
-  title: string;
-  teacher: string;
   courseCode: string;
+  title: string;
+  courseType: "0" | "1";
+  teacher: string;
+  semester: number;
+  creditHours: number;
+  creditHoursPerWeek: number;
 }
 
-export class Course implements ICourse {
-  id: number = 0;
-  title: string;
-  teacher: string;
-  courseCode: string;
+export const DEFAULT_COURSE: Course = {
+  id: 0,
+  courseCode: '',
+  title: '',
+  courseType: '0',
+  teacher: '',
+  semester: 1,
+  creditHours: 3,
+  creditHoursPerWeek: 3
+};
 
-  constructor(title: string, courseCode: string, teacher: string) {
-    this.id = new Date().getTime();
-    this.title = title;
-    this.courseCode = courseCode;
-    this.teacher = teacher;
-  }
-}
+export const Course = {
+  types: {
+    MINOR: '0',
+    MAJOR: '1'
+  } as const
+};
