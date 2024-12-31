@@ -1,7 +1,6 @@
 import { Course } from "@/app/models/course";
-import { redirect } from "next/navigation";
-import { CourseForm } from "../../../../components/courses/form";
 import { Metadata } from "next";
+import { CourseForm } from "../../../../components/courses/form";
 
 export const metadata: Metadata = {
   title: "Update - Course"
@@ -16,18 +15,9 @@ export default async function UpdateCoursePage({ params }: { params: Promise<{ k
   ];
 
   // Load Course from backend
-  const course = await new Promise<Course>(resolve => setTimeout(() => { resolve(courses.find(x => x.id == key)!)}, 4000));
+  const course = await new Promise<Course>(resolve => setTimeout(() => { resolve(courses.find(x => x.id == key)!) }, 4000));
 
   return (
-    <CourseForm formData={{ ...course }} action={onUpdate} />
+    <CourseForm formData={{ ...course }} />
   );
-}
-
-export const onUpdate = async (prevState: { error: string[] }, formData: FormData) => {
-  "use server"
-  if(prevState) return prevState;
-  if(formData) return prevState;
-
-  await new Promise<Course>(resolve => setTimeout(resolve, 2000));
-  redirect('/courses');
 }

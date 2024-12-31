@@ -12,7 +12,7 @@ import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { redirect, usePathname } from "next/navigation";
 import { useActionState, useState } from "react";
-
+import { toast } from "sonner";
 
 export type UpdateFormState = { error: string[] };
 export type UpdateFormData = { title: string; teacher: string; courseCode: string };
@@ -20,12 +20,46 @@ const initialState: UpdateFormState = {
     error: []
 };
 
+const onSubmit = (state: UpdateFormState, formData: FormData) => {
+    const courseCode = formData.get('courseCode') as string;
+    const title = formData.get('title') as string;
+    const teacher = formData.get('teacher') as string;
+    const semester = parseInt(formData.get('semester') as string);
+    const creditHours = parseInt(formData.get('creditHours') as string);
+    const creditHoursPerWeek = parseInt(formData.get('creditHoursPerWeek') as string);
+    const courseType = parseInt(formData.get('courseType') as string);
+
+    const errors: string[] = [];
+    if (!courseCode) errors.push("Course Code is required.");
+    if (!title) errors.push("Course Title is required.");
+    if (!teacher) errors.push("Teacher's Name is required.");
+    if (!semester) errors.push("Semester is required.");
+    if (!creditHours) errors.push("Credit Hours is required.");
+    if (!creditHoursPerWeek) errors.push("Credit Hours Per Week is required.");
+    if (!courseType) errors.push("Course Type is required.");
+
+    // Save the course
+    const course = {
+        courseCode,
+        title,
+        teacher,
+        semester,
+        creditHours,
+        creditHoursPerWeek,
+        courseType
+    };
+
+    toast.success(course.title + " has been saved successfully.");
+    redirect('/courses');
+}
+
 export function CourseForm({
-    formData, action
-}: { formData: UpdateFormData, action: (prevState: UpdateFormState, formData: FormData) => Promise<UpdateFormState> }) {
-    const [actionState, updateAction] = useActionState<UpdateFormState, FormData>(action, initialState);
+    formData
+}: { formData: UpdateFormData }) {
+    const [actionState, onSubmitAction] = useActionState<UpdateFormState, FormData>(onSubmit, initialState);
     const [courseCode, setCourseCode] = useState<string>(formData.courseCode);
     const path = usePathname();
+
     return (
         <>
             <div className="flex items-center justify-between align-start py-4">
@@ -41,7 +75,7 @@ export function CourseForm({
                     </Button>
                 </Link>
             </div>
-            <form action={updateAction}>
+            <form action={onSubmitAction}>
                 <div>
                     {actionState.error.map((error) => (
                         <div key={error}>{error}</div>
