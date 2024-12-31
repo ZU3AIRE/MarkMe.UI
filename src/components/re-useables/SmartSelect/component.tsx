@@ -42,4 +42,4 @@ const SmartSelect = ({ title, variant, items, onCheckedChange }: SmartSelectProp
     );
 };
 
-export default SmartSelect;
+export { SmartSelect };

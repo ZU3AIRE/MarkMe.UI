@@ -10,11 +10,11 @@ import { MoreHorizontal } from "lucide-react";
 import { MouseEventHandler, ReactNode } from "react";
 import { DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 
-export interface Actions {
+interface Actions {
     label: ReactNode;
     key: string;
     variant?: string;
-    onClick: MouseEventHandler<HTMLDivElement>
+    onClick?: MouseEventHandler<HTMLDivElement>
 }
 
 interface ActionButtonProps {
@@ -55,4 +55,6 @@ const ActionButton = ({ items }: ActionButtonProps) => {
     );
 };
 
-export default ActionButton;
+export { ActionButton };
+export type { Actions, ActionButtonProps };
+
