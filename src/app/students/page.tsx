@@ -12,8 +12,8 @@ export default async function Students() {
         // Simulate API call delay
         await new Promise(resolve => setTimeout(resolve, 4000));
         return students;
-    }
-
+   }
+  
     const students = await getStudents();
 
     return (
