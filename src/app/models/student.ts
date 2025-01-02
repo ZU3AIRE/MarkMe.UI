@@ -1,35 +1,50 @@
 export interface IStudent {
     id: number;
-    name: string;
-    email: string;
-    collegeRollNo: number;
-    universityRollNo: number;
+    collegeRollNo: string;
+    universityRollNo: string;
+    registrationNo: string;
+    firstName: string;
+    lastName: string;
     session: string;
-    phoneNumber: string;
-    currentSemester: string;
-    attendance: string;
+    section: string;
 }
-
 export class Student implements IStudent {
-    id: number = 0;
-    name: string;
-    email: string;
-    collegeRollNo: number;
-    universityRollNo: number;
+    id: number;
+    collegeRollNo: string;
+    universityRollNo: string;
+    registrationNo: string;
+    firstName: string;
+    lastName: string;
     session: string;
-    phoneNumber: string;
-    currentSemester: string;
-    attendance: string;
+    section: string;
 
-    constructor(name: string , email: string, collegeRollNo: number, universityRollNo: number, session: string, phoneNumber: string, currentSemester: string, attendance: string) {
+    constructor(
+        collegeRollNo: string,
+        universityRollNo: string,
+        registrationNo: string,
+        firstName: string,
+        lastName: string,
+        session: string,
+        section: string,
+    ) {
         this.id = Math.floor(Math.random() * 1000);
-        this.name = name;
-        this.email = email;
         this.collegeRollNo = collegeRollNo;
         this.universityRollNo = universityRollNo;
+        this.registrationNo = registrationNo;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.session = session;
-        this.phoneNumber = phoneNumber;
-        this.currentSemester = currentSemester;
-        this.attendance = attendance;
+        this.section = section;
     }
 }
+
+export const DEFAULT_STUDENT: Student = {
+    id: 0,
+    firstName: "",
+    lastName: "",
+    collegeRollNo: "",
+    universityRollNo: "",
+    registrationNo: "",
+    session: "",
+    section: ""
+};
