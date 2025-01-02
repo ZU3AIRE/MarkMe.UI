@@ -58,7 +58,6 @@ export const formSchema = z.object({
 const onSubmit = (formData: UpdateFormData) => {
 
     // Save the srtudent
-    console.log(formData);
     toast.success(formData.firstName + " has been saved successfully.");
     redirect('/students');
 }
