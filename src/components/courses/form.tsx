@@ -1,4 +1,5 @@
 "use client";
+import { Course, CreateCourseModel } from "@/app/models/course";
 import { Label, Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,55 +10,58 @@ import {
     InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { ArrowLeftIcon } from "lucide-react";
+import { ApiError } from "next/dist/server/api-utils";
 import Link from "next/link";
 import { redirect, usePathname } from "next/navigation";
 import { useActionState, useState } from "react";
 import { toast } from "sonner";
 
 export type UpdateFormState = { error: string[] };
-export type UpdateFormData = { title: string; teacher: string; courseCode: string };
+export type UpdateFormData = Course;
 const initialState: UpdateFormState = {
     error: []
 };
 
 const onSubmit = (state: UpdateFormState, formData: FormData) => {
-    const courseCode = formData.get('courseCode') as string;
+    "use client"
+    const code = formData.get('code') as string;
     const title = formData.get('title') as string;
-    const teacher = formData.get('teacher') as string;
+    const type = parseInt(formData.get('type') as string);
     const semester = parseInt(formData.get('semester') as string);
     const creditHours = parseInt(formData.get('creditHours') as string);
     const creditHoursPerWeek = parseInt(formData.get('creditHoursPerWeek') as string);
-    const courseType = parseInt(formData.get('courseType') as string);
-
-    const errors: string[] = [];
-    if (!courseCode) errors.push("Course Code is required.");
-    if (!title) errors.push("Course Title is required.");
-    if (!teacher) errors.push("Teacher's Name is required.");
-    if (!semester) errors.push("Semester is required.");
-    if (!creditHours) errors.push("Credit Hours is required.");
-    if (!creditHoursPerWeek) errors.push("Credit Hours Per Week is required.");
-    if (!courseType) errors.push("Course Type is required.");
-
-    // Save the course
-    const course = {
-        courseCode,
+    const course: CreateCourseModel = {
+        code,
         title,
-        teacher,
+        type,
         semester,
         creditHours,
-        creditHoursPerWeek,
-        courseType
+        creditHoursPerWeek
     };
 
-    toast.success(course.title + " has been saved successfully.");
-    redirect('/courses');
+    try {
+        console.log(course);
+        fetch('https://localhost:7177/api/Course/CreateCourse', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(course) })
+            .then(response => response.json())
+            .then(data => {
+                toast.success("🎉 Happy New Year!");
+                console.log(data);
+                redirect('/courses');
+            });
+    } catch (error) {
+        if (error instanceof ApiError) {
+            toast.error(error.message);
+            console.log('\n🐛', error, '\n');
+            return { error: error.message ? [error.message] : ["An error occurred."] };
+        }
+    }
+    return { error: [] };
 }
-
 export function CourseForm({
     formData
 }: { formData: UpdateFormData }) {
     const [actionState, onSubmitAction] = useActionState<UpdateFormState, FormData>(onSubmit, initialState);
-    const [courseCode, setCourseCode] = useState<string>(formData.courseCode);
+    const [courseCode, setCourseCode] = useState<string>(formData.code ?? "UNDEFINED");
     const path = usePathname();
 
     return (
@@ -67,7 +71,7 @@ export function CourseForm({
                     <h1 className="text-2xl font-semibold">
                         {path.startsWith('/courses/new') ? 'New Course' : formData.title ?? "NOT FOUND"}
                     </h1>
-                    {path.startsWith('/courses/update/') && formData.courseCode ? <p className="text-sm text-muted-foreground">~ {formData.courseCode.slice(0, 2) + "-" + formData.courseCode.slice(2)}</p> : ""}
+                    {path.startsWith('/courses/update/') && formData.code ? <p className="text-sm text-muted-foreground">~ {formData.code.slice(0, 2) + "-" + formData.code.slice(2)}</p> : ""}
                 </div>
                 <Link href="/courses">
                     <Button variant="outline">
@@ -83,8 +87,8 @@ export function CourseForm({
                 </div>
                 <div className="grid grid-cols-3 gap-8 mt-4">
                     <div className="col-span-3">
-                        <Label htmlFor="courseCode">Course Code</Label>
-                        <InputOTP maxLength={6} name="courseCode" value={courseCode} onChange={(v: string) => { setCourseCode(v) }} >
+                        <Label htmlFor="code">Course Code</Label>
+                        <InputOTP maxLength={6} name="code" value={courseCode} onChange={(v: string) => { setCourseCode(v) }} >
                             <InputOTPGroup>
                                 <InputOTPSlot index={0} />
                                 <InputOTPSlot index={1} />
@@ -102,14 +106,14 @@ export function CourseForm({
                         <Input
                             type="title"
                             name="title"
-                            defaultValue={formData.title}
+                            defaultValue={formData.title ?? 'UNDEFINED'}
                             placeholder="The course title. e.g., Data Structures"
                         />
                     </div>
 
                     <div>
-                        <Label htmlFor="courseType">Course Type</Label>
-                        <Select name="courseType" defaultValue="0" >
+                        <Label htmlFor="type">Course Type</Label>
+                        <Select name="type" >
                             <SelectTrigger >
                                 <SelectValue placeholder="Select course type" />
                             </SelectTrigger>
@@ -121,15 +125,6 @@ export function CourseForm({
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
-                    </div>
-                    <div>
-                        <Label htmlFor="teacher">Teacher&apos;s Name</Label>
-                        <Input
-                            type="text"
-                            name="teacher"
-                            defaultValue={formData.teacher}
-                            placeholder="The teacher's name. e.g., Zubair Jamil"
-                        />
                     </div>
                     <div >
                         <Label htmlFor="semester">Semester</Label>
@@ -150,6 +145,7 @@ export function CourseForm({
                             defaultValue={25}
                             min={20}
                             max={60}
+                            step={5}
                             placeholder="The credit hour alloted to this course. e.g., 25"
                         />
                     </div>
@@ -161,6 +157,7 @@ export function CourseForm({
                             defaultValue={3}
                             min={1}
                             max={12}
+                            step={5}
                             placeholder="The credit hour per week. e.g., 3"
                         />
                     </div>

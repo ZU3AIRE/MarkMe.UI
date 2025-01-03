@@ -114,23 +114,32 @@ export default function CourseGrid({ courses }: { courses: Course[] }) {
                 );
             },
             cell: ({ row }) => (
-                <div className="capitalize ml-4">{row.getValue("teacher")}</div>
+                <div className="capitalize ml-4">{row.getValue("teacher") ?? 'Zubair Jamil'}</div>
             ),
         },
         {
-            accessorKey: "courseCode",
+            accessorKey: "code",
             header: () => <div>Course Code</div>,
             cell: ({ row }) => {
-                return <div>{row.getValue("courseCode")}</div>;
+                let code = row.getValue<string>("code") ?? "UNDEFINED";
+                code = `${code.substring(0, 2)}-${code.substring(2)}`
+                return <div>{code}</div>;
             },
         },
         {
-            accessorKey: "courseType",
+            accessorKey: "type",
             header: () => <div>Course Type</div>,
             cell: ({ row }) => {
-                return row.getValue("courseType")!.toString() == Course.types.MAJOR ?
+                return row.getValue("type")!.toString() == Course.types.MAJOR ?
                     <Badge variant="outline" className="font-normal" >MAJOR</Badge> :
                     <Badge variant="outline" className="font-normal">MINOR</Badge>
+            },
+        },
+        {
+            accessorKey: "semester",
+            header: () => <div>Semester</div>,
+            cell: ({ row }) => {
+                return <Badge variant="outline" className="font-normal" >{row.getValue('semester')}</Badge>
             },
         },
         {
@@ -158,7 +167,7 @@ export default function CourseGrid({ courses }: { courses: Course[] }) {
                         key: "copy",
                         label: <>Copy Course Code</>,
                         onClick: () => {
-                            navigator.clipboard.writeText(course.courseCode.toString());
+                            navigator.clipboard.writeText(course.code ?? "UNDEFINED");
                         },
                     },
                     {
@@ -174,7 +183,7 @@ export default function CourseGrid({ courses }: { courses: Course[] }) {
                             </>
                         ),
                         onClick: () => {
-                            redirect(`/courses/update/${course.id}`);
+                            redirect(`/courses/update/${course.teacherId}`);
                         }
                     },
                     {
@@ -351,9 +360,9 @@ export default function CourseGrid({ courses }: { courses: Course[] }) {
                         <DialogDescription>
                             <span className="mt-3 mb-3 border-l-2 pl-3 italic">
                                 <span className="font-semibold">
-                                    {selectedForDeletion.courseCode}: {selectedForDeletion.title}
+                                    {selectedForDeletion.code}: {selectedForDeletion.title}
                                 </span>
-                                {selectedForDeletion.teacher ? ` taught by ${selectedForDeletion.teacher}` : ""}
+                                {selectedForDeletion.title ? ` taught by ${selectedForDeletion.teacherId}` : ""}
                                 {`?`}
                             </span>
                         </DialogDescription>

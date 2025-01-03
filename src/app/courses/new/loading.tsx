@@ -31,26 +31,25 @@ export default function Loading() {
                     <Skeleton className="h-[15px] w-[180px] rounded-md mb-2" />
                     <Skeleton className="h-[35px] w-full rounded-md" />
                 </div>
+
                 <div>
                     <Skeleton className="h-[15px] w-[180px] rounded-md mb-2" />
                     <Skeleton className="h-[35px] w-full rounded-md" />
                 </div>
+
                 <div>
                     <Skeleton className="h-[15px] w-[180px] rounded-md mb-2" />
                     <Skeleton className="h-[35px] w-full rounded-md" />
                 </div>
+
                 <div>
                     <Skeleton className="h-[15px] w-[180px] rounded-md mb-2" />
                     <Skeleton className="h-[35px] w-full rounded-md" />
                 </div>
-                <div>
-                    <Skeleton className="h-[15px] w-[180px] rounded-md mb-2" />
-                    <Skeleton className="h-[35px] w-full rounded-md" />
-                </div>
+
                 <div className="col-span-3 flex justify-end">
                     <Skeleton className="h-[35px] w-[100px] rounded-md" />
-                    <Skeleton className="h-[35px] w-[100px] rounded-md" />
-
+                    <Skeleton className="ms-2 h-[35px] w-[100px] rounded-md" />
                 </div>
             </div>
         </>
