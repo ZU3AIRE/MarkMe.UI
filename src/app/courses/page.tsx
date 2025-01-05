@@ -1,12 +1,19 @@
 import CourseGrid from "../../components/courses/grid";
-import { Course, CourseModel, DEFAULT_COURSE } from "../models/course";
+import { CourseModel } from "../models/course";
 
 export default async function Courses() {
-  const res = await fetch('https://localhost:7177/api/Course/GetAllCourses');
-  const data: CourseModel[] = await res.json();
-  const courses = data.map((x: CourseModel) : Course => ({ ...DEFAULT_COURSE, ...x }));
-  console.log('\n😎', courses, '\n');
+  let data: CourseModel[] = [];
+
+  try {
+    const res = await fetch('https://localhost:7177/api/Course/GetAllCourses');
+    if(res.ok) data = await res.json();
+    else throw new Error("Failed to fetch courses");
+  }
+  catch (err) {
+    console.error("Failed to fetch courses", err);
+  }
+
   return (
-    <CourseGrid courses={courses} />
+    <CourseGrid courses={data} />
   );
 }
