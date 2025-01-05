@@ -23,7 +23,6 @@ export default function Loading() {
                         <Skeleton className="h-[35px] w-[35px] rounded-md" />
                     </div>
                 </div>
-
                 <div>
                     <Skeleton className="h-[15px] w-[180px] rounded-md mb-2" />
                     <Skeleton className="h-[35px] w-full rounded-md" />
@@ -33,17 +32,17 @@ export default function Loading() {
                     <Skeleton className="h-[15px] w-[180px] rounded-md mb-2" />
                     <Skeleton className="h-[35px] w-full rounded-md" />
                 </div>
-
+              
                 <div>
                     <Skeleton className="h-[15px] w-[180px] rounded-md mb-2" />
                     <Skeleton className="h-[35px] w-full rounded-md" />
                 </div>
-
+              
                 <div>
                     <Skeleton className="h-[15px] w-[180px] rounded-md mb-2" />
                     <Skeleton className="h-[35px] w-full rounded-md" />
                 </div>
-
+              
                 <div>
                     <Skeleton className="h-[15px] w-[180px] rounded-md mb-2" />
                     <Skeleton className="h-[35px] w-full rounded-md" />
