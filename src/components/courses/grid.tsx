@@ -39,15 +39,16 @@ import {
     Trash2
 } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Course, DEFAULT_COURSE } from "../../app/models/course";
+import { CourseModel, CourseType } from '../../app/models/course';
+import { Badge } from "../ui/badge";
 
-export default function CourseGrid({ courses }: { courses: Course[] }) {
+export default function CourseGrid({ courses }: { courses: CourseModel[] }) {
     // Table Setup
+    const [data, setData] = useState<CourseModel[]>(courses);
     const [sorting, setSorting] = useState<SortingState>([]);
     const [rowSelection, setRowSelection] = useState({});
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
@@ -58,9 +59,8 @@ export default function CourseGrid({ courses }: { courses: Course[] }) {
 
     // Modal Open State Variables
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [selectedForDeletion, setSelectedForDeletion] = useState<Course>(DEFAULT_COURSE);
-
-    const columns: ColumnDef<Course>[] = [
+    const [selectedForDeletion, setSelectedForDeletion] = useState<CourseModel | null>(null);
+    const columns: ColumnDef<CourseModel>[] = [
         {
             id: "select",
             header: ({ table }) => (
@@ -83,69 +83,53 @@ export default function CourseGrid({ courses }: { courses: Course[] }) {
             enableSorting: false,
             enableHiding: false,
         },
+        // 'code'
         {
-            accessorKey: "title",
-            header: ({ column }) => {
-                return (
-                    <Button
-                        variant="ghost"
-                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                    >
-                        Course Title
-                        <ArrowUpDown />
-                    </Button>
-                );
+            accessorKey: "code", header: ({ column }) => {
+                return (<Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+                    Course Code <ArrowUpDown /> </Button>);
             },
-            cell: ({ row }) => (
-                <div className="capitalize ml-4">{row.getValue("title")}</div>
-            ),
-        },
-        {
-            accessorKey: "teacher",
-            header: ({ column }) => {
-                return (
-                    <Button
-                        variant="ghost"
-                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                    >
-                        Teacher
-                        <ArrowUpDown />
-                    </Button>
-                );
-            },
-            cell: ({ row }) => (
-                <div className="capitalize ml-4">{row.getValue("teacher")}</div>
-            ),
-        },
-        {
-            accessorKey: "courseCode",
-            header: () => <div>Course Code</div>,
             cell: ({ row }) => {
-                return <div>{row.getValue("courseCode")}</div>;
-            },
-        },
+                let code = row.getValue<string>("code")
+                if (!code) return "";
+                code = `${code.substring(0, 2)}-${code.substring(2)}`
+                return (<div className="text-center capitalize">{code}</div>)
+            }
+        },//'title'
         {
-            accessorKey: "courseType",
-            header: () => <div>Course Type</div>,
-            cell: ({ row }) => {
-                return row.getValue("courseType")!.toString() == Course.types.MAJOR ?
-                    <Badge variant="outline" className="font-normal" >MAJOR</Badge> :
-                    <Badge variant="outline" className="font-normal">MINOR</Badge>
+            accessorKey: "title", header: ({ column }) => {
+                return (<Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+                    Course Title <ArrowUpDown /> </Button>);
             },
-        },
+            cell: ({ row }) => (<div className="text-center capitalize">{row.getValue("title")}</div>)
+        },//'type'
         {
-            accessorKey: "creditHours",
-            header: () => <div>Credit Hours</div>,
-            cell: ({ row }) => {
-                return <div>{row.getValue("creditHours")}</div>;
+            accessorKey: "type", header: ({ column }) => {
+                return (<Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+                    Course Type <ArrowUpDown /> </Button>);
             },
-        },
+            cell: ({ row }) => (<Badge className={row.getValue("type") === CourseType.MAJOR ? "bg-red-50" : "bg-green-50"} variant={'outline'}><div className="text-center capitalize">{CourseType[parseInt(row.getValue("type"))]}</div></Badge>)
+        },// 'semester'
         {
-            accessorKey: "creditHoursPerWeek",
-            header: () => <div>Credit Hours/Week</div>,
-            cell: ({ row }) => {
-                return <div>{row.getValue("creditHoursPerWeek")}</div>;
+            accessorKey: "semester", header: ({ column }) => {
+                return (<Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+                    Semester <ArrowUpDown /> </Button>);
             },
+            cell: ({ row }) => (<div className="text-center capitalize">{row.getValue("semester")}</div>)
+        },// 'creditHours'
+        {
+            accessorKey: "creditHours", header: ({ column }) => {
+                return (<Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+                    Credit Hours <ArrowUpDown /> </Button>);
+            },
+            cell: ({ row }) => (<div className="text-center capitalize">{row.getValue("creditHours")}</div>)
+        },//   'creditHoursPerWeek'
+        {
+            accessorKey: "creditHoursPerWeek", header: ({ column }) => {
+                return (<Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+                    Credit Hours/Week <ArrowUpDown /> </Button>);
+            },
+            cell: ({ row }) => (<div className="text-center capitalize">{row.getValue("creditHoursPerWeek")}</div>)
         },
         {
             id: "actions",
@@ -158,7 +142,7 @@ export default function CourseGrid({ courses }: { courses: Course[] }) {
                         key: "copy",
                         label: <>Copy Course Code</>,
                         onClick: () => {
-                            navigator.clipboard.writeText(course.courseCode.toString());
+                            navigator.clipboard.writeText(course.code);
                         },
                     },
                     {
@@ -174,7 +158,7 @@ export default function CourseGrid({ courses }: { courses: Course[] }) {
                             </>
                         ),
                         onClick: () => {
-                            redirect(`/courses/update/${course.id}`);
+                            redirect(`/courses/update/${course.courseId}`);
                         }
                     },
                     {
@@ -186,6 +170,7 @@ export default function CourseGrid({ courses }: { courses: Course[] }) {
                         ),
                         variant: 'destructive',
                         onClick: () => {
+                            if (!course) { toast.error("Unable to select for deletion"); return; };
                             setSelectedForDeletion(course);
                             setIsDeleteModalOpen(true);
                         },
@@ -199,7 +184,7 @@ export default function CourseGrid({ courses }: { courses: Course[] }) {
     ];
 
     const table = useReactTable({
-        data: courses,
+        data,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -217,10 +202,52 @@ export default function CourseGrid({ courses }: { courses: Course[] }) {
         },
     });
 
-    const onCourseDeleted = (course: Course) => {
-        setIsDeleteModalOpen(false);
-        toast.warning(`${course.title} deleted successfully!`);
-    };
+    const onCourseDeleted = (course: CourseModel) => {
+        fetch(`https://localhost:7177/api/Course/DeleteCourse/${course.courseId}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' } })
+            .then(response => {
+                if (!response.ok) {
+                    switch (response.status) {
+                        case 400:
+                            toast.error("Invalid data was provided.");
+                            break;
+                        default:
+                            toast.error("An error occurred while deleting the course.");
+                            break;
+                    }
+                }
+                return response.ok ? response.json() : null;
+            })
+            .then((data: CourseModel | null) => {
+                if (!data) return;
+
+                toast.warning(`${course.title} deleted successfully!`);
+                console.log("✅ Updated: ", data);
+                setIsDeleteModalOpen(false);
+                fetch('https://localhost:7177/api/Course/GetAllCourses')
+                    .then(res => {
+                        if (!res.ok) {
+                            switch (res.status) {
+                                case 400:
+                                    toast.error("Invalid data was provided.");
+                                    break;
+                                default:
+                                    toast.error("An error occurred while deleting the course.");
+                                    break;
+                            }
+                        }
+                        return res.ok ? res.json() : null;
+                    }).then(res => {
+                        setData(res);
+                    }).
+                    catch(err => {
+                        console.error("Failed to fetch courses", err);
+                    });
+            })
+            .catch((error: Error) => {
+                toast.error("An error occurred while deleting the course.");
+                console.log('🐛 ', error);
+            });
+    }
 
     return (
         <>
@@ -248,7 +275,7 @@ export default function CourseGrid({ courses }: { courses: Course[] }) {
                         items={table
                             .getAllColumns()
                             .filter((column) => column.getCanHide())
-                            .map((column: Column<Course>) => {
+                            .map((column: Column<CourseModel>) => {
                                 return {
                                     key: column.id,
                                     label: column.id,
@@ -272,10 +299,10 @@ export default function CourseGrid({ courses }: { courses: Course[] }) {
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id}>
+                            <TableRow key={headerGroup.id} >
                                 {headerGroup.headers.map((header) => {
                                     return (
-                                        <TableHead key={header.id}>
+                                        <TableHead key={header.id} style={{ textAlign: "center" }}>
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
@@ -296,7 +323,7 @@ export default function CourseGrid({ courses }: { courses: Course[] }) {
                                     data-state={row.getIsSelected() && "selected"}
                                 >
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
+                                        <TableCell key={cell.id} style={{ textAlign: "center" }}>
                                             {flexRender(
                                                 cell.column.columnDef.cell,
                                                 cell.getContext()
@@ -351,10 +378,8 @@ export default function CourseGrid({ courses }: { courses: Course[] }) {
                         <DialogDescription>
                             <span className="mt-3 mb-3 border-l-2 pl-3 italic">
                                 <span className="font-semibold">
-                                    {selectedForDeletion.courseCode}: {selectedForDeletion.title}
+                                    {selectedForDeletion?.code}: {selectedForDeletion?.title}?
                                 </span>
-                                {selectedForDeletion.teacher ? ` taught by ${selectedForDeletion.teacher}` : ""}
-                                {`?`}
                             </span>
                         </DialogDescription>
                     </DialogHeader>
@@ -363,7 +388,7 @@ export default function CourseGrid({ courses }: { courses: Course[] }) {
                             <CircleXIcon />
                             Cancel
                         </Button>{" "}
-                        <Button onClick={() => onCourseDeleted(selectedForDeletion)} variant="destructive">
+                        <Button onClick={() => { if (selectedForDeletion) onCourseDeleted(selectedForDeletion) }} variant="destructive">
                             <Trash2 />
                             Delete
                         </Button>
