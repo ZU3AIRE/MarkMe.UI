@@ -1,22 +1,19 @@
-import { Course } from "../models/course";
 import CourseGrid from "../../components/courses/grid";
+import { CourseModel } from "../models/course";
 
 export default async function Courses() {
-  async function getCourses() {
-    const courses: Course[] = [
-      { id: 1, courseCode: 'IT-101', title: 'Introduction to Programming', teacher: 'John Doe', creditHours: 48, creditHoursPerWeek: 3, semester: 4, courseType: "1" },
-      { id: 2, courseCode: 'WD-202', title: 'Web Development', teacher: 'Jane Smith', creditHours: 62, creditHoursPerWeek: 4, semester: 6, courseType: "0" },
-      { id: 3, courseCode: 'DS-303', title: 'Data Structures', teacher: 'Bob Wilson', creditHours: 50, creditHoursPerWeek: 2, semester: 7, courseType: "1" },
-    ];
+  let data: CourseModel[] = [];
 
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 4000));
-    return courses;
+  try {
+    const res = await fetch('https://localhost:7177/api/Course/GetAllCourses');
+    if(res.ok) data = await res.json();
+    else throw new Error("Failed to fetch courses");
+  }
+  catch (err) {
+    console.error("Failed to fetch courses", err);
   }
 
-  const courses = await getCourses();
-
   return (
-    <CourseGrid courses={courses} />
+    <CourseGrid courses={data} />
   );
 }

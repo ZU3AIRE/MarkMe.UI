@@ -1,5 +1,6 @@
 "use client";
-import { Label, Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui";
+import { CourseModel, CourseType } from "@/app/models/course";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -8,66 +9,117 @@ import {
     InputOTPSeparator,
     InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
-import { redirect, usePathname } from "next/navigation";
-import { useActionState, useState } from "react";
+import { redirect, useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 
-export type UpdateFormState = { error: string[] };
-export type UpdateFormData = { title: string; teacher: string; courseCode: string };
-const initialState: UpdateFormState = {
-    error: []
-};
+const formSchema = z.object({
+    code: z
+        .string()
+        .max(5, { message: "Must be of type XX-000" })
+        .min(5, { message: "Must be of type XX-000" })
+        .refine((value) => /^[A-Za-z][A-Za-z]\d\d\d/.test(value), { message: "Must be of type AB-100" }),
 
-const onSubmit = (state: UpdateFormState, formData: FormData) => {
-    const courseCode = formData.get('courseCode') as string;
-    const title = formData.get('title') as string;
-    const teacher = formData.get('teacher') as string;
-    const semester = parseInt(formData.get('semester') as string);
-    const creditHours = parseInt(formData.get('creditHours') as string);
-    const creditHoursPerWeek = parseInt(formData.get('creditHoursPerWeek') as string);
-    const courseType = parseInt(formData.get('courseType') as string);
+    title: z
+        .string()
+        .min(3, { message: "Title must be at least 3 characters." }),
 
-    const errors: string[] = [];
-    if (!courseCode) errors.push("Course Code is required.");
-    if (!title) errors.push("Course Title is required.");
-    if (!teacher) errors.push("Teacher's Name is required.");
-    if (!semester) errors.push("Semester is required.");
-    if (!creditHours) errors.push("Credit Hours is required.");
-    if (!creditHoursPerWeek) errors.push("Credit Hours Per Week is required.");
-    if (!courseType) errors.push("Course Type is required.");
+    type: z.preprocess(
+        (value) => parseInt(value as unknown as string),
+        z.nativeEnum(CourseType)),
 
-    // Save the course
-    const course = {
-        courseCode,
-        title,
-        teacher,
-        semester,
-        creditHours,
-        creditHoursPerWeek,
-        courseType
-    };
+    semester: z.preprocess(
+        (value) => parseInt(value as unknown as string),
+        z.number().positive().min(1, { message: "You must give a current semester" })
+    ),
 
-    toast.success(course.title + " has been saved successfully.");
-    redirect('/courses');
-}
+    creditHours: z.preprocess(
+        (value) => parseInt(value as unknown as string),
+        z.number().min(3, { message: "Credit hours must be greater than 3" })
+    ),
 
-export function CourseForm({
-    formData
-}: { formData: UpdateFormData }) {
-    const [actionState, onSubmitAction] = useActionState<UpdateFormState, FormData>(onSubmit, initialState);
-    const [courseCode, setCourseCode] = useState<string>(formData.courseCode);
-    const path = usePathname();
+    creditHoursPerWeek: z.preprocess(
+        (value) => parseInt(value as unknown as string),
+        z.number().min(3, { message: "Credit hours per week must be greater than 3" })
+    )
+});
+
+// 'code' | 'title' | 'type' | 'semester' | 'creditHours' | 'creditHoursPerWeek'
+type courseModel = z.infer<typeof formSchema>;
+
+export default function CourseForm({ defaultValue, mode }: { defaultValue?: CourseModel, mode: 'create' | 'update' }) {
+    const router = useRouter();
+    const onSubmit = (formData: courseModel) => {
+        if (mode === 'create') {
+            fetch('https://localhost:7177/api/Course/CreateCourse', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(formData) })
+                .then(response => {
+                    if (!response.ok) {
+                        switch (response.status) {
+                            case 400:
+                                toast.error("Invalid data was provided.");
+                                break;
+                            default:
+                                toast.error("An error occurred while creating the course.");
+                                break;
+                        }
+                    }
+                    return response.ok ? response.json() : null;
+                })
+                .then((data: CourseModel | null) => {
+                    if (!data) return;
+
+                    toast.success(`Course ${data.title} created successfully!`);
+                    console.log("✅ Added: ", data);
+                    router.push('/courses');
+                })
+                .catch((error: Error) => {
+                    toast.error("An error occurred while creating the course.");
+                    console.log('🐛 ', error);
+                });
+        }
+        else {
+            fetch(`https://localhost:7177/api/Course/UpdateCourse/${defaultValue?.courseId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({ courseId: defaultValue?.courseId, ...formData }) })
+                .then(response => {
+                    if (!response.ok) {
+                        switch (response.status) {
+                            case 400:
+                                toast.error("Invalid data was provided.");
+                                break;
+                            default:
+                                toast.error("An error occurred while updating the course.");
+                                break;
+                        }
+                    }
+                    return response.ok ? response.json() : null;
+                })
+                .then((data: CourseModel | null) => {
+                    if (!data) return;
+
+                    toast.success(`Course ${data.title} updated successfully!`);
+                    console.log("✅ Updated: ", data);
+                    router.push('/courses');
+                })
+                .catch((error: Error) => {
+                    toast.error("An error occurred while updating the course.");
+                    console.log('🐛 ', error);
+                });
+        }
+    }
+
+    const form = useForm<courseModel>({
+        resolver: zodResolver(formSchema),
+        defaultValues: defaultValue,
+    });
 
     return (
         <>
             <div className="flex items-center justify-between align-start py-4">
                 <div>
-                    <h1 className="text-2xl font-semibold">
-                        {path.startsWith('/courses/new') ? 'New Course' : formData.title ?? "NOT FOUND"}
-                    </h1>
-                    {path.startsWith('/courses/update/') && formData.courseCode ? <p className="text-sm text-muted-foreground">~ {formData.courseCode.slice(0, 2) + "-" + formData.courseCode.slice(2)}</p> : ""}
+                    <h1 className="text-2xl font-semibold">New Course</h1>
                 </div>
                 <Link href="/courses">
                     <Button variant="outline">
@@ -75,101 +127,140 @@ export function CourseForm({
                     </Button>
                 </Link>
             </div>
-            <form action={onSubmitAction}>
-                <div>
-                    {actionState.error.map((error) => (
-                        <div key={error}>{error}</div>
-                    ))}
-                </div>
-                <div className="grid grid-cols-3 gap-8 mt-4">
-                    <div className="col-span-3">
-                        <Label htmlFor="courseCode">Course Code</Label>
-                        <InputOTP maxLength={6} name="courseCode" value={courseCode} onChange={(v: string) => { setCourseCode(v) }} >
-                            <InputOTPGroup>
-                                <InputOTPSlot index={0} />
-                                <InputOTPSlot index={1} />
-                            </InputOTPGroup>
-                            <InputOTPSeparator />
-                            <InputOTPGroup>
-                                <InputOTPSlot index={2} />
-                                <InputOTPSlot index={3} />
-                                <InputOTPSlot index={4} />
-                            </InputOTPGroup>
-                        </InputOTP>
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)}>
+                    <div className="sm:my-4 lg:my-6">
+                        <FormField
+                            control={form.control}
+                            name="code"
+                            render={({ field }) => {
+                                return (
+                                    <FormItem>
+                                        <FormLabel>Course Code</FormLabel>
+                                        <FormControl>
+                                            <InputOTP maxLength={5} {...field}>
+                                                <InputOTPGroup>
+                                                    {Array.from({ length: 2 }, (_, index) => (
+                                                        <InputOTPSlot key={index} index={index} />
+                                                    ))}
+                                                </InputOTPGroup>
+                                                <InputOTPSeparator />
+                                                <InputOTPGroup>
+                                                    {Array.from({ length: 3 }, (_, index) => (
+                                                        <InputOTPSlot key={index} index={index + 2} />
+                                                    ))}
+                                                </InputOTPGroup>
+                                            </InputOTP>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )
+                            }}
+                        />
                     </div>
-                    <div>
-                        <Label htmlFor="title">Course Title</Label>
-                        <Input
-                            type="title"
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-4 lg:gap-6">
+                        <FormField
+                            control={form.control}
                             name="title"
-                            defaultValue={formData.title}
-                            placeholder="The course title. e.g., Data Structures"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Course Title</FormLabel>
+                                    <FormControl>
+                                        <Input type="text" placeholder="Programming Title" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
-                    </div>
 
-                    <div>
-                        <Label htmlFor="courseType">Course Type</Label>
-                        <Select name="courseType" defaultValue="0" >
-                            <SelectTrigger >
-                                <SelectValue placeholder="Select course type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectGroup>
-                                    <SelectLabel>Course Type</SelectLabel>
-                                    <SelectItem value="0" >Minor</SelectItem>
-                                    <SelectItem value="1">Major</SelectItem>
-                                </SelectGroup>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div>
-                        <Label htmlFor="teacher">Teacher&apos;s Name</Label>
-                        <Input
-                            type="text"
-                            name="teacher"
-                            defaultValue={formData.teacher}
-                            placeholder="The teacher's name. e.g., Zubair Jamil"
+                        <FormField
+                            control={form.control}
+                            name="type"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Course Type</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value.toString()}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select a valid type" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value={CourseType.MINOR.toString()}>Minor</SelectItem>
+                                            <SelectItem value={CourseType.MAJOR.toString()}>Major</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
-                    </div>
-                    <div >
-                        <Label htmlFor="semester">Semester</Label>
-                        <Input
-                            type="number"
+
+                        <FormField
+                            control={form.control}
                             name="semester"
-                            defaultValue={1}
-                            min={1}
-                            max={8}
-                            placeholder="The semester number. e.g., 1"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Semester</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value.toString()}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select a valid semester" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {Array.from({ length: 8 }, (_, index) => (<SelectItem value={(index + 1).toString()} key={index}>{index + 1}</SelectItem>))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
-                    </div>
-                    <div >
-                        <Label htmlFor="creditHours">Credit Hours</Label>
-                        <Input
-                            type="number"
+
+                        <FormField
+                            control={form.control}
                             name="creditHours"
-                            defaultValue={25}
-                            min={20}
-                            max={60}
-                            placeholder="The credit hour alloted to this course. e.g., 25"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Credit Hours</FormLabel>
+                                    <FormControl>
+                                        <Input type="number" placeholder="Credit Hours" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
-                    </div>
-                    <div >
-                        <Label htmlFor="creditHoursPerWeek">Credit Hours Per Week</Label>
-                        <Input
-                            type="number"
+
+                        <FormField
+                            control={form.control}
                             name="creditHoursPerWeek"
-                            defaultValue={3}
-                            min={1}
-                            max={12}
-                            placeholder="The credit hour per week. e.g., 3"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Credit Hours Per Week</FormLabel>
+                                    <FormControl>
+                                        <Input type="number" placeholder="Credit Hours Per Week" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
+
+                        <div className="col-span-1 sm:col-span-3 flex justify-end">
+                            <Button
+                                type="button"
+                                className="w-[128px]"
+                                variant="outline"
+                                onClick={() => redirect("/courses")}
+                            >
+                                Cancel
+                            </Button>
+                            <Button type="submit" className="w-[128px] ms-4">
+                                {mode === 'create' ? 'Submit' : 'Update'}
+                            </Button>
+                        </div>
+
                     </div>
-                    <div className="col-span-3 flex justify-end">
-                        <Button type="button" className="w-[128px]" variant={'outline'} onClick={() => redirect('/courses')}>Cancel</Button>
-                        <Button type="submit" className="w-[128px] ms-4">Save</Button>
-                    </div>
-                </div>
-            </form>
+                </form>
+            </Form>
         </>
     );
 }

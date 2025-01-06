@@ -16,6 +16,7 @@ export default async function Students() {
   
     const students = await getStudents();
 
+
     return (
         <StudentGrid students={students} />
     );
