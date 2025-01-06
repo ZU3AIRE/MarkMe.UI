@@ -55,6 +55,10 @@ const data = {
           title: "Students",
           url: "students",
         },
+        {
+          title: "Class Representatives",
+          url: "class-representatives",
+        },
       ],
     },
 
