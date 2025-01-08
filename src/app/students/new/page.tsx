@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 export default function RegisterStudent() {
 
     return (
-        <StudentForm formData={DEFAULT_STUDENT} />
+        <StudentForm defaultValue={DEFAULT_STUDENT} mode="create" />
     );
 }
 

@@ -1,5 +1,5 @@
 export interface IStudent {
-    id: number;
+    studentId: number;
     collegeRollNo: string;
     universityRollNo: string;
     registrationNo: string;
@@ -9,7 +9,7 @@ export interface IStudent {
     section: string;
 }
 export class Student implements IStudent {
-    id: number;
+    studentId: number;
     collegeRollNo: string;
     universityRollNo: string;
     registrationNo: string;
@@ -27,7 +27,7 @@ export class Student implements IStudent {
         session: string,
         section: string,
     ) {
-        this.id = Math.floor(Math.random() * 1000);
+        this.studentId = Math.floor(Math.random() * 1000);
         this.collegeRollNo = collegeRollNo;
         this.universityRollNo = universityRollNo;
         this.registrationNo = registrationNo;
@@ -39,12 +39,12 @@ export class Student implements IStudent {
 }
 
 export const DEFAULT_STUDENT: Student = {
-    id: 0,
+    studentId: 0,
     firstName: "",
     lastName: "",
     collegeRollNo: "",
     universityRollNo: "",
     registrationNo: "",
     session: "",
-    section: ""
+    section: "",
 };
