@@ -18,6 +18,8 @@ Add the keys from the [Clerk](https://clerk.com/)
 ```
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=********************************
 CLERK_SECRET_KEY=********************************
+DOTNET_API_URL=<api_base_url>
+NODE_TLS_REJECT_UNAUTHORIZED="0"
 ```
 #### Run the development server:
 ```bash
