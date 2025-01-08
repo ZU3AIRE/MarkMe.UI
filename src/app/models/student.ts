@@ -9,6 +9,7 @@ export interface IStudent {
     section: string;
 }
 export class Student implements IStudent {
+    //TODO: Mousa, Update model in Class Representatives as well
     id: number;
     collegeRollNo: string;
     universityRollNo: string;
