@@ -19,7 +19,7 @@ const ClassRepresentatives = async () => {
     try {
         const res = await fetch('https://localhost:7177/api/cr/getallcrs');
         if (res.ok) crs = await res.json();
-        else throw new Error("Failed to fetch courses");
+        else throw new Error("Failed to fetch courses, " + res.statusText);
     }
     catch (err) {
         console.error("Failed to fetch courses", err);
@@ -41,7 +41,7 @@ const ClassRepresentatives = async () => {
 
     let students: StudentModel[] = [];
     try {
-        const res = await fetch('https://localhost:7177/api/Student/GetAllStudents');
+        const res = await fetch('https://localhost:7177/api/Student/GetCRNominees');
         if (res.ok) students = await res.json();
         else throw new Error("Failed to fetch students");
     }

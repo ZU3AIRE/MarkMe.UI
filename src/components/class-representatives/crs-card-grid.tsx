@@ -21,9 +21,9 @@ const FormSchema = z.object({
 const CRsCardGrid = ({ classRepresentatives, courses, students }: {
     classRepresentatives: CRModel[],
     courses: { value: number, label: string, code: string }[]
-    students:  StudentModel[]
+    students: StudentModel[]
 }) => {
-console.log(students)
+    const [nominees, setNominees] = useState<StudentModel[]>(students);
     const [crs, setCrs] = useState<CRModel[]>(classRepresentatives);
     const [isNominateModalOpen, setIsNominateModalOpen] = useState(false);
 
@@ -37,20 +37,34 @@ console.log(students)
 
     const loadCourses = () => {
         fetch('https://localhost:7177/api/cr/getallcrs')
-        .then((res) => {
-            if (!res.ok) throw new Error("Failed to fetch courses");
-            return res.json();
-        })
-        .then((data) => {
-            setCrs(data);
-        })
-        .catch((err) => {
-            console.error("Failed to fetch courses", err);
-        });
+            .then((res) => {
+                if (!res.ok) throw new Error("Failed to fetch courses");
+                return res.json();
+            })
+            .then((data) => {
+                setCrs(data);
+            })
+            .catch((err) => {
+                console.error("Failed to fetch courses", err);
+            });
+    }
+
+    const loadNominees = () => {
+        fetch('https://localhost:7177/api/Student/GetCRNominees')
+            .then((res) => {
+                if (!res.ok) throw new Error("Failed to fetch students");
+                return res.json();
+            })
+            .then((data) => {
+                setNominees(data);
+            })
+            .catch((err) => {
+                console.error("Failed to fetch students", err);
+            });
     }
 
     const onNominate = (formData: z.infer<typeof FormSchema>) => {
-        const reqBody = { studentId: formData.studentId, courseIds: formData.courseIds!.map((checked, index) => checked && courses.at(index)?.value).filter(Boolean)};
+        const reqBody = { studentId: formData.studentId, courseIds: formData.courseIds!.map((checked, index) => checked && courses.at(index)?.value).filter(Boolean) };
         fetch('https://localhost:7177/api/CR/NominateCR', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(reqBody) })
             .then(response => {
                 if (!response.ok) {
@@ -73,6 +87,7 @@ console.log(students)
 
                 // loadData
                 loadCourses()
+                loadNominees()
                 setIsNominateModalOpen(false);
             })
             .catch((error: Error) => {
@@ -184,7 +199,7 @@ console.log(students)
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                {students.map((student, index) => (
+                                                {nominees.map((student, index) => (
                                                     <SelectItem key={index} value={student?.studentId.toString()}>
                                                         {student?.firstName}{" "}{student?.lastName}
                                                     </SelectItem>
