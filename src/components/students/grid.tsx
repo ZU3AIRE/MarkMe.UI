@@ -1,5 +1,5 @@
 'use client'
-import { DEFAULT_STUDENT, IStudent, Student } from "@/app/models/student"
+import { DEFAULT_STUDENT, Student } from "@/app/models/student"
 import { ActionButton, Actions, SmartSelect } from "@/components/re-useables"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -8,14 +8,15 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Column, ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, SortingState, useReactTable, VisibilityState } from "@tanstack/react-table"
 import { ArrowUpDown, CircleXIcon, PlusIcon, SquarePen, Trash2 } from "lucide-react"
-import { redirect } from "next/navigation"
 import Link from "next/link"
-import React from "react"
+import { redirect } from "next/navigation"
+import React, { useState } from "react"
 import { toast } from "sonner"
 
 export default function StudentGrid({ students }: { students: Student[] }) {
 
     // Table Setup
+    const [data, setData] = useState<Student[]>(students);
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [rowSelection, setRowSelection] = React.useState({});
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -64,7 +65,7 @@ export default function StudentGrid({ students }: { students: Student[] }) {
                     </Button>
                 )
             },
-            cell: ({ row }) => <div className="ml-7 lowercase">{row.getValue("firstName")}</div>,
+            cell: ({ row }) => <div className="ml-7">{row.getValue("firstName")}</div>,
         },
         {
             accessorKey: "lastName",
@@ -79,7 +80,7 @@ export default function StudentGrid({ students }: { students: Student[] }) {
                     </Button>
                 )
             },
-            cell: ({ row }) => <div className="ml-7 lowercase">{row.getValue("lastName")}</div>,
+            cell: ({ row }) => <div className="ml-7">{row.getValue("lastName")}</div>,
         },
         {
             accessorKey: "collegeRollNo",
@@ -146,7 +147,7 @@ export default function StudentGrid({ students }: { students: Student[] }) {
                     </Button>
                 )
             },
-            cell: ({ row }) => <div className="ml-11 lowercase">{row.getValue("section")}</div>,
+            cell: ({ row }) => <div className="ml-11 uppercase">{row.getValue("section")}</div>,
         },
         {
             id: "actions",
@@ -159,7 +160,7 @@ export default function StudentGrid({ students }: { students: Student[] }) {
                         key: "copy",
                         label: <>Copy Student Id</>,
                         onClick: () => {
-                            navigator.clipboard.writeText(student.id.toString());
+                            navigator.clipboard.writeText(student.studentId.toString());
                         },
                     },
                     {
@@ -175,7 +176,7 @@ export default function StudentGrid({ students }: { students: Student[] }) {
                             </>
                         ),
                         onClick: () => {
-                            redirect(`/students/update/${student.id}`);
+                            redirect(`/students/update/${student.studentId}`);
                         },
                     },
                     {
@@ -200,7 +201,7 @@ export default function StudentGrid({ students }: { students: Student[] }) {
     ]
 
     const table = useReactTable({
-        data: students,
+        data,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -218,11 +219,51 @@ export default function StudentGrid({ students }: { students: Student[] }) {
         },
     })
 
-    const onStudentDeleted = (deleteStudent: Student) => {
-        setIsDeleteModalOpen(false);
-        toast.warning(
-            `${deleteStudent.firstName} is deleted successfully!`)
+    const onStudentDeleted = (student: Student) => {
+        fetch(`https://localhost:7177/api/Student/DeleteStudent/${student.studentId}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' } })
+            .then(response => {
+                if (!response.ok) {
+                    switch (response.status) {
+                        case 400:
+                            toast.error("Invalid data was provided.");
+                            break;
+                        default:
+                            toast.error("An error occurred while deleting the course.");
+                            break;
+                    }
+                }
+                return response.ok ? response.json() : null;
+            })
+            .then((data: Student | null) => {
+                if (!data) return;
 
+                toast.warning(`${student.firstName} deleted successfully!`);
+                console.log("✅ Updated: ", data);
+                setIsDeleteModalOpen(false);
+                fetch('https://localhost:7177/api/Student/GetAllStudents')
+                    .then(res => {
+                        if (!res.ok) {
+                            switch (res.status) {
+                                case 400:
+                                    toast.error("Invalid data was provided.");
+                                    break;
+                                default:
+                                    toast.error("An error occurred while deleting the student.");
+                                    break;
+                            }
+                        }
+                        return res.ok ? res.json() : null;
+                    }).then(res => {
+                        setData(res);
+                    }).
+                    catch(err => {
+                        console.error("Failed to fetch students", err);
+                    });
+            })
+            .catch((error: Error) => {
+                toast.error("An error occurred while deleting the student.");
+                console.log('🐛 ', error);
+            });
     }
     return (
         <>
@@ -252,7 +293,7 @@ export default function StudentGrid({ students }: { students: Student[] }) {
                                 table
                                     .getAllColumns()
                                     .filter((column) => column.getCanHide())
-                                    .map((column: Column<IStudent>) => {
+                                    .map((column: Column<Student>) => {
                                         return {
                                             key: column.id,
                                             label: column.id,

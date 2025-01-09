@@ -1,4 +1,5 @@
 "use client";
+import { Student } from "@/app/models/student";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,23 +12,20 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
-import { redirect, usePathname } from "next/navigation";
+import { redirect, usePathname, useRouter } from "next/navigation";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-
-export type UpdateFormData = { firstName: string; lastName: string; collegeRollNo: string; universityRollNo: string; registrationNo: string; session: string; section: string; };
-
 export const formSchema = z.object({
     firstName: z
         .string()
-        .regex(/^[A-Za-z_]+$/, { message: "First Name can only contain alphabets and underscores." })
+        .regex(/^[A-Za-z_ ]+$/, { message: "First Name can only contain alphabets and underscores." })
         .min(3, { message: "First Name must be at least 3 characters." }),
 
     lastName: z
         .string()
-        .regex(/^[A-Za-z_]+$/, { message: "Last Name can only contain alphabets and underscores." })
+        .regex(/^[A-Za-z_ ]+$/, { message: "Last Name can only contain alphabets and underscores." })
         .min(3, { message: "Last Name must be at least 3 characters." }),
 
     collegeRollNo: z
@@ -54,32 +52,82 @@ export const formSchema = z.object({
         .string()
         .min(1, { message: "You must give a section." }),
 });
-
-const onSubmit = (formData: UpdateFormData) => {
-
-    // Save the srtudent
-    toast.success(formData.firstName + " has been saved successfully.");
-    redirect('/students');
-}
+type studentModel = z.infer<typeof formSchema>;
 
 export function StudentForm({
-    formData
-}: { formData: UpdateFormData }) {
-    const form = useForm({
-        resolver: zodResolver(formSchema),
-        defaultValues: formData,
-    });
+    defaultValue, mode
+}: { defaultValue?: Student, mode: 'create' | 'update' }) {
     const path = usePathname();
+    const router = useRouter();
+    const onSubmit = (formData: studentModel) => {
+        if (mode === 'create') {
+            fetch('https://localhost:7177/api/Student/CreateStudent', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(formData) })
+                .then(response => {
+                    if (!response.ok) {
+                        switch (response.status) {
+                            case 400:
+                                toast.error("Invalid data was provided.");
+                                break;
+                            default:
+                                toast.error("An error occurred while creating the student.");
+                                break;
+                        }
+                    }
+                    return response.ok ? response.json() : null;
+                })
+                .then((data: Student | null) => {
+                    if (!data) return;
 
+                    toast.success(`Student ${data.firstName} created successfully!`);
+                    console.log("✅ Added: ", data);
+                    router.push('/students');
+                })
+                .catch((error: Error) => {
+                    toast.error("An error occurred while creating the student.");
+                    console.log('🐛 ', error);
+                });
+        }
+        else {
+            fetch(`https://localhost:7177/api/Student/UpdateStudent/${defaultValue?.studentId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({ ...formData, studentId: defaultValue?.studentId }) })
+                .then(response => {
+                    if (!response.ok) {
+                        switch (response.status) {
+                            case 400:
+                                toast.error("Invalid data was provided.");
+                                break;
+                            default:
+                                toast.error("An error occurred while updating the student.");
+                                break;
+                        }
+                    }
+                    return response.ok ? response.json() : null;
+                })
+                .then((data: Student | null) => {
+                    if (!data) return;
+
+                    toast.success(`Student ${data.firstName} updated successfully!`);
+                    console.log("✅ Updated: ", data);
+                    router.push('/students');
+                })
+                .catch((error: Error) => {
+                    toast.error("An error occurred while updating the student.");
+                    console.log('🐛 ', error);
+                });
+        }
+    }
+    const form = useForm<studentModel>({
+        resolver: zodResolver(formSchema),
+        defaultValues: defaultValue,
+    });
     return (
         <div className="flex flex-col gap-8 lg:p-12">
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-semibold">
-                        {path.startsWith("/students/new") ? "New Student" : formData.firstName ?? "NOT FOUND"}
+                        {path.startsWith("/students/new") ? "New Student" : `${defaultValue?.firstName ?? "NOT FOUND"} ${defaultValue?.lastName ?? ""}`}
                     </h1>
-                    {path.startsWith("/students/update/") && formData.collegeRollNo ?
-                        <p className="text-sm text-muted-foreground">~ {formData.collegeRollNo}</p> : ""}
+                    {path.startsWith("/students/update/") && defaultValue?.collegeRollNo ?
+                        <p className="text-sm text-muted-foreground">~ {defaultValue?.collegeRollNo}</p> : ""}
                 </div>
                 <Link href="/students">
                     <Button variant="outline">
