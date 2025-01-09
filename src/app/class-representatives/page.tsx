@@ -1,4 +1,4 @@
-import CRsCardGrid from "@/components/class-representatives/crs-card-grid"
+import CRMainGrid from "@/components/class-representatives/main-grid"
 import { CRModel } from '../models/class-representative'
 
 export type StudentModel = {
@@ -24,7 +24,7 @@ const ClassRepresentatives = async () => {
                     </h1>
                 </div>
             </div>
-            <CRsCardGrid classRepresentatives={crs} />
+            <CRMainGrid classRepresentatives={crs} />
         </>
     )
 }

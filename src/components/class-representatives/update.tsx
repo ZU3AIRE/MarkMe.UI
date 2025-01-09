@@ -27,7 +27,7 @@ export default function UpdateCr({ student, courseIds, onSuccess: _onSuccess }: 
     const defaultValues: FormData = { studentId: student.studentId, courseIds: courseIds }
     return (
         <>
-            <Button variant={'outline'} className="ml-auto" size="icon" onClick={() => { setOpen(true) }}><SquareArrowOutUpRight /></Button>
+            <Button variant={'outline'} size="icon" onClick={() => { setOpen(true) }}><SquareArrowOutUpRight /></Button>
             <Dialog open={open} onOpenChange={(_open) => setOpen(_open)}>
                 <DialogContent className="lg:max-w-[30vw] max-h-[65vh] overflow-y-auto p-6 rounded-lg shadow-lg">
                     <DialogHeader >

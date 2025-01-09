@@ -5,11 +5,13 @@ import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage, Input, Separator } from "../ui";
 import { Badge } from "../ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import { Switch } from "../ui/switch";
 import { get } from "./form";
 import Nominate from "./nominate";
 import UpdateCr from "./update";
+import { toast } from "sonner";
 
-const CRsCardGrid = ({ classRepresentatives }: { classRepresentatives: CRModel[] }) => {
+const CRMainGrid = ({ classRepresentatives }: { classRepresentatives: CRModel[] }) => {
     const [crs, setCrs] = useState<CRModel[]>(classRepresentatives);
 
     const loadCRs = () => {
@@ -24,6 +26,13 @@ const CRsCardGrid = ({ classRepresentatives }: { classRepresentatives: CRModel[]
         loadCRs();
     }
 
+
+    const toggleActive = (studentId: number, name: string, isDisabled: boolean): void => {
+        get<CRModel[]>(`https://localhost:7177/api/cr/toggleactive/${studentId}/${isDisabled}`, (data) => {
+            if (isDisabled) toast.warning(`${name} has been disabled.`); else toast.success(`${name} has been enabled.`);
+            setCrs(data)
+        })
+    }
 
     return (
         <>
@@ -52,8 +61,10 @@ const CRsCardGrid = ({ classRepresentatives }: { classRepresentatives: CRModel[]
                                     <CardTitle>{`${cr.firstName} ${cr.lastName}`}</CardTitle>
                                     <CardDescription><a href={`tel:${cr.phoneNumber}`}>{cr.phoneNumber}</a></CardDescription>
                                 </div>
-
-                                <UpdateCr courseIds={cr.courses.map(x => x.id)} onSuccess={onSuccess} student={{ ...cr }} />
+                                <div className="ml-auto space-x-4">
+                                    <Switch defaultChecked={!cr.isDisabled} onCheckedChange={(checked) => toggleActive(cr.studentId, cr.firstName, !checked)} />
+                                    <UpdateCr courseIds={cr.courses.map(x => x.id)} onSuccess={onSuccess} student={{ ...cr }} />
+                                </div>
                             </div>
                         </CardHeader>
                         <CardContent>
@@ -103,4 +114,4 @@ const CRsCardGrid = ({ classRepresentatives }: { classRepresentatives: CRModel[]
     )
 }
 
-export default CRsCardGrid
+export default CRMainGrid

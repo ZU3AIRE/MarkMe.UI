@@ -13,4 +13,5 @@ export type CRModel = {
     courses: SelectListItem[];
     activities: Activity[];
     avatar: string;
+    isDisabled: boolean;
 };
