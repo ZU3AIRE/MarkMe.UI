@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui";
 import AddUpdateForm, { FormData } from "./form";
 
-export default function Nominate({ onSuccess: _onSuccess }: { onSuccess: () => void }) {
+export default function Nominate({ onSuccess: _onSuccess, token }: { onSuccess: () => void, token: string }) {
     const [open, setOpen] = useState(false);
     const defaultValues: FormData = { studentId: 0, courseIds: [0] }
 
@@ -25,7 +25,7 @@ export default function Nominate({ onSuccess: _onSuccess }: { onSuccess: () => v
                             Select the course you wish to nominate a class representative for.
                         </DialogDescription>
                     </DialogHeader>
-                    <AddUpdateForm defaultValues={defaultValues} mode={"add"} updateNominee={undefined} onSuccess={onSuccess}>
+                    <AddUpdateForm defaultValues={defaultValues} mode={"add"} updateNominee={undefined} onSuccess={onSuccess} token={token}>
                         <footer className="space-x-4 text-end">
                             <Button variant="outline" onClick={() => setOpen(false)} type="button">Cancel</Button>
                             <Button type="submit">Nominate</Button>

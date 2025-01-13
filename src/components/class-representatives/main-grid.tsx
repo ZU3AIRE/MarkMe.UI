@@ -2,6 +2,7 @@
 import { CRModel } from "@/app/models/class-representative";
 import { timeAgo } from "@/lib/utils";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage, Input, Separator } from "../ui";
 import { Badge } from "../ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
@@ -9,16 +10,16 @@ import { Switch } from "../ui/switch";
 import { get } from "./form";
 import Nominate from "./nominate";
 import UpdateCr from "./update";
-import { toast } from "sonner";
 
-const CRMainGrid = ({ classRepresentatives }: { classRepresentatives: CRModel[] }) => {
+const CRMainGrid = ({ classRepresentatives, token }: { classRepresentatives: CRModel[], token: string }) => {
+
     const [crs, setCrs] = useState<CRModel[]>(classRepresentatives);
 
     const loadCRs = () => {
         get<CRModel[]>('https://localhost:7177/api/cr/getallcrs',
             (data) => {
                 setCrs(data);
-            });
+            }, token);
     }
 
     const onSuccess = () => {
@@ -31,7 +32,7 @@ const CRMainGrid = ({ classRepresentatives }: { classRepresentatives: CRModel[] 
         get<CRModel[]>(`https://localhost:7177/api/cr/toggleactive/${studentId}/${isDisabled}`, (data) => {
             if (isDisabled) toast.warning(`${name} has been disabled.`); else toast.success(`${name} has been enabled.`);
             setCrs(data)
-        })
+        }, token)
     }
 
     return (
@@ -45,7 +46,7 @@ const CRMainGrid = ({ classRepresentatives }: { classRepresentatives: CRModel[] 
                         }
                         className="max-w-sm"
                     />
-                    <Nominate onSuccess={onSuccess} />
+                    <Nominate onSuccess={onSuccess} token={token} />
                 </div>
             </div>
             <div className="gap-4 w-full grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 justify-center pe-4 ps-8 pb-8">
@@ -63,7 +64,7 @@ const CRMainGrid = ({ classRepresentatives }: { classRepresentatives: CRModel[] 
                                 </div>
                                 <div className="ml-auto space-x-4">
                                     <Switch defaultChecked={!cr.isDisabled} onCheckedChange={(checked) => toggleActive(cr.studentId, cr.firstName, !checked)} />
-                                    <UpdateCr courseIds={cr.courses.map(x => x.id)} onSuccess={onSuccess} student={{ ...cr }} />
+                                    <UpdateCr courseIds={cr.courses.map(x => x.id)} onSuccess={onSuccess} student={{ ...cr }} token={token} />
                                 </div>
                             </div>
                         </CardHeader>

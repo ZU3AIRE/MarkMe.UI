@@ -1,5 +1,6 @@
-import CRMainGrid from "@/components/class-representatives/main-grid"
-import { CRModel } from '../models/class-representative'
+import CRMainGrid from "@/components/class-representatives/main-grid";
+import { auth } from '@clerk/nextjs/server';
+import { CRModel } from '../models/class-representative';
 
 export type StudentModel = {
     studentId: number;
@@ -13,8 +14,11 @@ export type StudentModel = {
 }
 
 const ClassRepresentatives = async () => {
+    const { getToken } = await auth();
+    const token = await getToken({ template: 'mark_me_backend_api' });
+    if (token === null) return null;
 
-    const crs: CRModel[] = await get('https://localhost:7177/api/cr/getallcrs');
+    const crs: CRModel[] = await get('https://localhost:7177/api/cr/getallcrs', token);
     return (
         <>
             <div className="pe-4 ps-8">
@@ -24,7 +28,7 @@ const ClassRepresentatives = async () => {
                     </h1>
                 </div>
             </div>
-            <CRMainGrid classRepresentatives={crs} />
+            <CRMainGrid classRepresentatives={crs} token={token} />
         </>
     )
 }
@@ -32,11 +36,11 @@ const ClassRepresentatives = async () => {
 
 export default ClassRepresentatives
 
-const get = async (url: string) => {
+const get = async (url: string, token: string | null) => {
     try {
-        const res = await fetch(url);
+        const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
         if (res.ok) return await res.json();
-        else throw new Error("Failed to fetch students");
+        else throw new Error("Failed to fetch" + res.status);
     }
     catch (err) {
         console.error("❌ ", err);
