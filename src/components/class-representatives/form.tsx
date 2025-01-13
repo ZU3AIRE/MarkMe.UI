@@ -18,7 +18,8 @@ type AddUpdateFomProps = {
     children: ReactNode,
     mode: "add" | "update",
     updateNominee: StudentModel | undefined,
-    onSuccess: () => void
+    onSuccess: () => void,
+    token: string
 }
 
 const FormSchema = z.object({
@@ -28,7 +29,7 @@ const FormSchema = z.object({
 
 export type FormData = z.infer<typeof FormSchema>
 
-export default function AddUpdateForm({ children, defaultValues, mode, updateNominee, onSuccess }: AddUpdateFomProps) {
+export default function AddUpdateForm({ children, defaultValues, mode, updateNominee, onSuccess, token }: AddUpdateFomProps) {
 
     const form = useForm<FormData>({
         resolver: zodResolver(FormSchema),
@@ -47,7 +48,8 @@ export default function AddUpdateForm({ children, defaultValues, mode, updateNom
                 if (!data) return;
                 toast.success(`A new ${data.firstName} ${data.lastName} has been created successfully.`);
                 onSuccess();
-            }
+            },
+            token
         )
     }
 
@@ -56,16 +58,17 @@ export default function AddUpdateForm({ children, defaultValues, mode, updateNom
             () => {
                 toast.success(`${updateNominee?.firstName} ${updateNominee?.lastName} has been updated successfully.`);
                 onSuccess();
-            }
+            },
+            token
         )
     }
 
     useEffect(() => {
-        if (mode === "add") loadNominees(setNominees)
+        if (mode === "add") loadNominees(setNominees, token)
         else setNominees([updateNominee!]);
 
-        loadCourses(setCourses);
-    }, [mode, updateNominee])
+        loadCourses(setCourses, token);
+    }, [mode, updateNominee, token])
 
     return (
         <Form {...form}>
@@ -141,14 +144,14 @@ export default function AddUpdateForm({ children, defaultValues, mode, updateNom
 }
 
 
-const loadNominees = (setter: (data: StudentModel[]) => void) =>
-    get<StudentModel[]>('https://localhost:7177/api/student/getcrnominees', setter);
+const loadNominees = (setter: (data: StudentModel[]) => void, token: string) =>
+    get<StudentModel[]>('https://localhost:7177/api/student/getcrnominees', setter, token);
 
-const loadCourses = (setter: (data: CourseModel[]) => void) =>
-    get<CourseModel[]>('https://localhost:7177/api/course/getallcourses', setter);
+const loadCourses = (setter: (data: CourseModel[]) => void, token: string) =>
+    get<CourseModel[]>('https://localhost:7177/api/course/getallcourses', setter, token);
 
-export function get<T>(url: string, cb: (data: T) => void) {
-    fetch(url)
+export function get<T>(url: string, cb: (data: T) => void, token: string) {
+    fetch(url, { headers: { Authorization: `Bearer ${token}` } })
         .then((res) => {
             if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
             return res.json();
@@ -161,8 +164,8 @@ export function get<T>(url: string, cb: (data: T) => void) {
         });
 }
 
-function post<T>(url: string, body: string, cb: (data: T) => void) {
-    fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: body })
+function post<T>(url: string, body: string, cb: (data: T) => void, token: string) {
+    fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${token}` }, body: body })
         .then(response => {
             if (!response.ok) {
                 switch (response.status) {
@@ -183,8 +186,8 @@ function post<T>(url: string, body: string, cb: (data: T) => void) {
         });
 }
 
-function postOnly(url: string, body: string, cb: () => void) {
-    fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: body })
+function postOnly(url: string, body: string, cb: () => void, token?: string) {
+    fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${token}` }, body: body })
         .then(response => {
             if (!response.ok) {
                 switch (response.status) {

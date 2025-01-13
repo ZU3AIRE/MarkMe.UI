@@ -13,10 +13,11 @@ type UpdateCrProps = {
         studentId: number
     },
     courseIds: number[],
-    onSuccess: () => void
+    onSuccess: () => void,
+    token: string
 }
 
-export default function UpdateCr({ student, courseIds, onSuccess: _onSuccess }: UpdateCrProps) {
+export default function UpdateCr({ student, courseIds, onSuccess: _onSuccess, token }: UpdateCrProps) {
     const [open, setOpen] = useState(false);
 
     const onSuccess = () => {
@@ -36,7 +37,7 @@ export default function UpdateCr({ student, courseIds, onSuccess: _onSuccess }: 
                             Select the course you wish to nominate a class representative for.
                         </DialogDescription>
                     </DialogHeader>
-                    <AddUpdateForm onSuccess={onSuccess} defaultValues={defaultValues} mode={"update"} updateNominee={{ ...DEFAULT_STUDENT, firstName: student.firstName, lastName: student.lastName, studentId: student.studentId }}>
+                    <AddUpdateForm token={token} onSuccess={onSuccess} defaultValues={defaultValues} mode={"update"} updateNominee={{ ...DEFAULT_STUDENT, firstName: student.firstName, lastName: student.lastName, studentId: student.studentId }}>
                         <footer className="space-x-4 text-end">
                             <Button variant="outline" onClick={() => setOpen(false)} type="button">Cancel</Button>
                             <Button type="submit">Update</Button>
