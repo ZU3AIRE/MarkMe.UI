@@ -14,6 +14,7 @@ interface Actions {
     label: ReactNode;
     key: string;
     variant?: string;
+    disabled?: boolean;
     onClick?: MouseEventHandler<HTMLDivElement>
 }
 
@@ -42,6 +43,7 @@ const ActionButton = ({ items }: ActionButtonProps) => {
                                     key={item.key}
                                     onClick={item.onClick}
                                     className={(item.variant == 'destructive') ? 'text-red-500' : ''}
+                                    disabled={item.disabled}
                                 >
                                     {item.label}
                                 </DropdownMenuItem>

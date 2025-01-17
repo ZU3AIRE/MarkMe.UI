@@ -12,11 +12,13 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import React, { useState } from "react"
 import { toast } from "sonner"
+import NominateCR from "./nominate"
 
-export default function StudentGrid({ students }: { students: Student[] }) {
+export default function StudentGrid({ students, nominees, token }: { students: Student[], nominees: Student[], token: string }) {
 
     // Table Setup
     const [data, setData] = useState<Student[]>(students);
+    const [Nominees, setNominess] = useState<Student[]>(nominees);
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [rowSelection, setRowSelection] = React.useState({});
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -26,8 +28,10 @@ export default function StudentGrid({ students }: { students: Student[] }) {
         React.useState<VisibilityState>({});
 
     // Modal Open State Variables
+    const [isNominate, setNominamteModalOpen] = React.useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
     const [selectedForDeletion, setSelectedStudentForDeletion] = React.useState<Student>(DEFAULT_STUDENT);
+    const [StudentId, setStudentId] = React.useState<number>(0);
 
     const columns: ColumnDef<Student>[] = [
         {
@@ -192,9 +196,20 @@ export default function StudentGrid({ students }: { students: Student[] }) {
                             setIsDeleteModalOpen(true);
                         },
                     },
+                    {
+                        key: "makeCR",
+                        label: <>Make CR</>,
+                        disabled: !Nominees.some(s => s.studentId === student.studentId),
+                        onClick: () => {
+                            setNominamteModalOpen(true);
+                            setStudentId(student.studentId);
+                        },
+                    },
                 ];
                 return (
-                    <ActionButton items={tableActions} ></ActionButton>
+                    <>
+                        <ActionButton items={tableActions} ></ActionButton>
+                    </>
                 );
             },
         },
@@ -218,6 +233,32 @@ export default function StudentGrid({ students }: { students: Student[] }) {
             rowSelection,
         },
     })
+
+    const onSuccess = () => {
+        fetch('https://localhost:7177/api/Student/GetCRNominees')
+            .then(res => {
+                if (!res.ok) {
+                    switch (res.status) {
+                        case 400:
+                            toast.error("Invalid data was provided.");
+                            break;
+                        default:
+                            toast.error("An error occurred while deleting the student.");
+                            break;
+                    }
+                }
+                return res.ok ? res.json() : null;
+            }).then(res => {
+                res.map((std: Student) => {
+                    std.registrationNo = std.registrationNo.slice(0, 4) + '-' + std.registrationNo.slice(4, 7) + '-' + std.registrationNo.slice(7, 10);
+                    std.session = std.session.slice(0, 4) + '-' + std.session.slice(4, 8);
+                })
+                setNominess(res);
+            }).
+            catch(err => {
+                console.error("Failed to fetch students", err);
+            });
+    }
 
     const onStudentDeleted = (student: Student) => {
         fetch(`https://localhost:7177/api/Student/DeleteStudent/${student.studentId}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' } })
@@ -254,6 +295,10 @@ export default function StudentGrid({ students }: { students: Student[] }) {
                         }
                         return res.ok ? res.json() : null;
                     }).then(res => {
+                        res.map((std: Student) => {
+                            std.registrationNo = std.registrationNo.slice(0, 4) + '-' + std.registrationNo.slice(4, 7) + '-' + std.registrationNo.slice(7, 10);
+                            std.session = std.session.slice(0, 4) + '-' + std.session.slice(4, 8);
+                        })
                         setData(res);
                     }).
                     catch(err => {
@@ -267,13 +312,14 @@ export default function StudentGrid({ students }: { students: Student[] }) {
     }
     return (
         <>
+            <NominateCR onSuccess={onSuccess} token={token} open={isNominate} setOpen={setNominamteModalOpen} studentId={StudentId} />
             <div className="pe-4 ps-8">
                 <div className="flex items-center justify-between py-4">
                     <h1 className="text-2xl font-semibold">
                         Students
                     </h1>
                     <Link href="/students/new" >
-                        <Button variant="outline">
+                        <Button>
                             <PlusIcon /> Add
                         </Button>
                     </Link>
