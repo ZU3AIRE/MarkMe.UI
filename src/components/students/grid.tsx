@@ -69,7 +69,11 @@ export default function StudentGrid({ students, nominees, token }: { students: S
                     </Button>
                 )
             },
-            cell: ({ row }) => <div className="ml-7">{row.getValue("firstName")}</div>,
+            cell: ({ row }) =>
+            {
+                const student = row.original;
+                return <div className="ml-7"> {Nominees.some(s => s.studentId === student.studentId) ? student.firstName : student.firstName + ' (CR)'} </div>
+            },
         },
         {
             accessorKey: "lastName",

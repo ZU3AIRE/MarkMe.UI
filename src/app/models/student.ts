@@ -1,14 +1,5 @@
-export interface IStudent {
-    studentId: number;
-    collegeRollNo: string;
-    universityRollNo: string;
-    registrationNo: string;
-    firstName: string;
-    lastName: string;
-    session: string;
-    section: string;
-}
-export class Student implements IStudent {
+
+export class Student {
     studentId: number;
     collegeRollNo: string;
     universityRollNo: string;

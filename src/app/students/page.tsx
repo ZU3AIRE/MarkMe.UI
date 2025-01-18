@@ -27,10 +27,10 @@ export default async function Students() {
                 student.session = student.session.slice(0, 4) + '-' + student.session.slice(4, 8);
             })
         }
-        else throw new Error("Failed to fetch students");
+        else throw new Error("Failed to fetch nominees");
     }
     catch (err) {
-        console.error("Failed to fetch students", err);
+        console.error("Failed to fetch nominees", err);
     }
     return (
         <StudentGrid students={data} nominees={nomies} token={token} />
