@@ -46,7 +46,7 @@ export default function AddUpdateForm({ children, defaultValues, mode, updateNom
         post<CRModel | null>('https://localhost:7177/api/cr/nominatecr', JSON.stringify(formData),
             (data) => {
                 if (!data) return;
-                toast.success(`A new ${data.firstName} ${data.lastName} has been created successfully.`);
+                toast.success(`${data.firstName} ${data.lastName} has been nominated as CR.`);
                 onSuccess();
             },
             token

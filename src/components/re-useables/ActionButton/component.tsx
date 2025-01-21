@@ -14,7 +14,7 @@ interface Actions {
     label: ReactNode;
     key: string;
     variant?: string;
-    disabled?: boolean;
+    hidden?: boolean;
     onClick?: MouseEventHandler<HTMLDivElement>
 }
 
@@ -38,12 +38,11 @@ const ActionButton = ({ items }: ActionButtonProps) => {
                         (item) => {
                             if (item.key === 'separator') {
                                 return (<DropdownMenuSeparator key={item.key} />)
-                            } else {
+                            } else if(!item.hidden) {
                                 return (<DropdownMenuItem
                                     key={item.key}
                                     onClick={item.onClick}
                                     className={(item.variant == 'destructive') ? 'text-red-500' : ''}
-                                    disabled={item.disabled}
                                 >
                                     {item.label}
                                 </DropdownMenuItem>
