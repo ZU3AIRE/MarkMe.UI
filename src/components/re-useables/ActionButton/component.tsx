@@ -4,16 +4,17 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
+    DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 import { MouseEventHandler, ReactNode } from "react";
-import { DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 
 interface Actions {
     label: ReactNode;
     key: string;
     variant?: string;
+    hidden?: boolean;
     onClick?: MouseEventHandler<HTMLDivElement>
 }
 
@@ -37,7 +38,7 @@ const ActionButton = ({ items }: ActionButtonProps) => {
                         (item) => {
                             if (item.key === 'separator') {
                                 return (<DropdownMenuSeparator key={item.key} />)
-                            } else {
+                            } else if (!item.hidden) {
                                 return (<DropdownMenuItem
                                     key={item.key}
                                     onClick={item.onClick}
@@ -56,5 +57,5 @@ const ActionButton = ({ items }: ActionButtonProps) => {
 };
 
 export { ActionButton };
-export type { Actions, ActionButtonProps };
+export type { ActionButtonProps, Actions };
 
