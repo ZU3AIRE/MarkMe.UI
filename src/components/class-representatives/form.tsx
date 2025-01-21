@@ -4,13 +4,12 @@ import { StudentModel } from "@/app/class-representatives/page";
 import { CRModel } from "@/app/models/class-representative";
 import { CourseModel } from "@/app/models/course";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Checkbox, Form, FormControl, FormDescription, FormField, FormItem, FormLabel, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui";
 import { ScrollArea } from "../ui/scroll-area";
-import { useEffect } from "react";
 
 
 type AddUpdateFomProps = {

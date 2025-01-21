@@ -1,6 +1,6 @@
 "use client"
-import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui";
 import AddUpdateForm, { FormData } from "@/components/class-representatives/form";
+import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui";
 
 export default function NominateCR({ onSuccess: _onSuccess, token, open, setOpen, studentId }: { onSuccess: () => void, token: string, open: boolean, setOpen: (open: boolean) => void, studentId: number }) {
     debugger;
