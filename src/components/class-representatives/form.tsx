@@ -4,13 +4,12 @@ import { StudentModel } from "@/app/class-representatives/page";
 import { CRModel } from "@/app/models/class-representative";
 import { CourseModel } from "@/app/models/course";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Checkbox, Form, FormControl, FormDescription, FormField, FormItem, FormLabel, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui";
 import { ScrollArea } from "../ui/scroll-area";
-import { useEffect } from "react";
 
 
 type AddUpdateFomProps = {
@@ -46,7 +45,7 @@ export default function AddUpdateForm({ children, defaultValues, mode, updateNom
         post<CRModel | null>('https://localhost:7177/api/cr/nominatecr', JSON.stringify(formData),
             (data) => {
                 if (!data) return;
-                toast.success(`A new ${data.firstName} ${data.lastName} has been created successfully.`);
+                toast.success(`${data.firstName} ${data.lastName} has been nominated as CR.`);
                 onSuccess();
             },
             token
