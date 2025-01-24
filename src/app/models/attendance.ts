@@ -1,12 +1,23 @@
+
 export interface IAttendance {
-    attendanceId: string;
+    attendanceId: number;
+    studentId: number
+    courseId: number;
     name: string;
-    collegeRollNumber: string;
-    universityRollNumber: string;
+    collegeRollNo: string;
+    universityRollNo: string;
     courseCode: string;
     courseTitle: string;
-    attendedAt: string;
+    semester: number;
+    dateMarked: Date;
     markedBy: string;
-    isDeleted: boolean;
-    isArchived: boolean;
+    status: string;
+    // isDeleted: boolean;
+    // isArchived: boolean;
+}
+
+export type CourseDropdownModel = {
+    courseId: number;
+    courseCode: string;
+    courseName: string;
 }
