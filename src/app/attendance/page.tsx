@@ -1,6 +1,6 @@
-import MarkAttendance from "@/components/attendance/grid";
-import { CourseDropdownModel, IAttendance } from "../models/attendance";
+import AttendanceGrid from "@/components/attendance/grid";
 import { auth } from "@clerk/nextjs/server";
+import { CourseDropdownModel, IAttendance } from "../models/attendance";
 
 export default async function Attendance() {
     let data: CourseDropdownModel[] = [];
@@ -35,7 +35,7 @@ export default async function Attendance() {
         console.error("Failed to fetch attendances", err);
     }
     return (<>
-        <MarkAttendance courses={data} attendances={attendances} />
+        <AttendanceGrid courses={data} attendances={attendances} token={token} />
     </>);
 }
 

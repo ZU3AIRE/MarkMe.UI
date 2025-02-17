@@ -1,4 +1,3 @@
-
 export interface IAttendance {
     attendanceId: number;
     studentId: number
@@ -20,4 +19,9 @@ export type CourseDropdownModel = {
     courseId: number;
     courseCode: string;
     courseName: string;
+}
+
+export interface AttendanceResponse{
+    message: string;
+    invalidRollNumbers?: string[];
 }

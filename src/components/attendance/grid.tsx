@@ -4,13 +4,6 @@ import { Calendar } from "@/components/ui/calendar"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
-import {
     Column,
     ColumnDef,
     ColumnFiltersState,
@@ -26,6 +19,7 @@ import {
 import { ArrowUpDown } from "lucide-react"
 import React, { useState } from "react"
 
+import { AttendanceResponse, CourseDropdownModel, IAttendance } from '@/app/models/attendance'
 import { SmartSelect } from "@/components/re-useables"
 import {
     Table,
@@ -35,8 +29,8 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { CourseDropdownModel, IAttendance } from '@/app/models/attendance'
-import { CourseModel } from "@/app/models/course"
+import MarkAttendance from './form';
+import { toast } from "sonner"
 
 const columns: ColumnDef<IAttendance>[] = [
     {
@@ -117,7 +111,7 @@ const columns: ColumnDef<IAttendance>[] = [
         cell: ({ row }) => <div className="ml-8">{row.getValue("status")}</div>,
     },
 ]
-export default function MarkAttendance({ courses, attendances }: { courses: CourseDropdownModel[], attendances: IAttendance[] }) {
+export default function AttendanceGrid({ courses, attendances, token }: { courses: CourseDropdownModel[], attendances: IAttendance[], token: string }) {
     const [data, setAttendance] = useState<IAttendance[]>(attendances)
     const dateString = getTodaysDate()
     const [date, setDate] = React.useState<Date | undefined>(new Date())
@@ -131,9 +125,7 @@ export default function MarkAttendance({ courses, attendances }: { courses: Cour
         React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
 
-    // States
-    const [rollNo, setRollNo] = React.useState<string>("")
-    const [courseId, setCourseId] = React.useState<string>("")
+
 
     const table = useReactTable({
         data,
@@ -153,6 +145,33 @@ export default function MarkAttendance({ courses, attendances }: { courses: Cour
             rowSelection,
         },
     })
+    const markedAttendance = (response: AttendanceResponse) => {
+        if (response.invalidRollNumbers?.length) {
+            toast.success(response.message);
+            toast.warning(`Invalid Student Roll Nos: ${response.invalidRollNumbers}`);
+        }
+        else {
+            toast.success(response.message);
+        }
+
+        fetch('https://localhost:7177/api/Attendance/GetAllAttendance', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+        })
+        .then(response => {
+            if(response.ok)
+                return response.json();
+            else
+                throw new Error("Failed to fetch attendances");
+        })
+        .then((data: IAttendance[]) => {
+            setAttendance(data);
+        })
+    }
 
     return (
         <div className="pe-4 ps-8">
@@ -161,28 +180,7 @@ export default function MarkAttendance({ courses, attendances }: { courses: Cour
                     <h2 className="scroll-m-20 text-2xl font-extrabold italic tracking-tight text-muted-foreground lg:text-md">{dateString}</h2>
                 </div>
                 <div className="flex flex-row gap-4">
-                    <div className="flex flex-col gap-4 items-end">
-                        <Select
-                        onValueChange={(value) => setCourseId(value)}
-                        >
-                            <SelectTrigger className="w-[450px]">
-                                <SelectValue placeholder="Select Course" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {courses.map((c) => (
-                                    <SelectItem key={c.courseId} value={c.courseId.toString()}
-                                    >
-                                        {c.courseCode} - {c.courseName}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <Input className="w-[450px]" placeholder="Enter comma separated roll numbers"
-                        value={rollNo}
-                        onChange={(e) => setRollNo(e.target.value)}
-                        />
-                        <Button> Mark Attendance</Button>
-                    </div>
+                    <MarkAttendance courses={courses} handleMarkAttend={markedAttendance} token={token}></MarkAttendance>
                     <Calendar
                         mode="single"
                         selected={date}
