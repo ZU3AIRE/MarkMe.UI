@@ -34,6 +34,10 @@ export default async function Attendance() {
     catch (err) {
         console.error("Failed to fetch attendances", err);
     }
+    attendances = attendances.map((a) => {
+        a.dateMarked = new Date(a.dateMarked).toLocaleString();
+        return a;
+    });
     return (<>
         <AttendanceGrid courses={data} attendances={attendances} token={token} />
     </>);

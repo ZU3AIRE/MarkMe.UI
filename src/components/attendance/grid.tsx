@@ -86,8 +86,8 @@ const columns: ColumnDef<IAttendance>[] = [
     {
         accessorKey: "dateMarked",
         header: () => {
-            return(
-            <div className="ml-2">Date Marked</div>
+            return (
+                <div className="ml-2">Date Marked</div>
             );
         }
     },
@@ -147,7 +147,9 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
     })
     const markedAttendance = (response: AttendanceResponse) => {
         if (response.invalidRollNumbers?.length) {
-            toast.success(response.message);
+            if (response.message !== undefined) {
+                toast.success(response.message);
+            }
             toast.warning(`Invalid Student Roll Nos: ${response.invalidRollNumbers}`);
         }
         else {
@@ -162,15 +164,15 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
                 'Authorization': `Bearer ${token}`
             },
         })
-        .then(response => {
-            if(response.ok)
-                return response.json();
-            else
-                throw new Error("Failed to fetch attendances");
-        })
-        .then((data: IAttendance[]) => {
-            setAttendance(data);
-        })
+            .then(response => {
+                if (response.ok)
+                    return response.json();
+                else
+                    throw new Error("Failed to fetch attendances");
+            })
+            .then((data: IAttendance[]) => {
+                setAttendance(data);
+            })
     }
 
     return (

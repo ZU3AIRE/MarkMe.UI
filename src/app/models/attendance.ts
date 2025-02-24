@@ -8,7 +8,7 @@ export interface IAttendance {
     courseCode: string;
     courseTitle: string;
     semester: number;
-    dateMarked: Date;
+    dateMarked: string;
     markedBy: string;
     status: string;
     // isDeleted: boolean;
@@ -22,6 +22,6 @@ export type CourseDropdownModel = {
 }
 
 export interface AttendanceResponse{
-    message: string;
+    message?: string;
     invalidRollNumbers?: string[];
 }

@@ -18,7 +18,7 @@ export default function MarkAttendance({ courses, handleMarkAttend, token }: { c
 
     const markAttendance = () => {
         console.log(body);
-      const data =  fetch(`https://localhost:7177/api/Attendance/AddAttendance`, {
+        const data = fetch(`https://localhost:7177/api/Attendance/AddAttendance`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -32,6 +32,9 @@ export default function MarkAttendance({ courses, handleMarkAttend, token }: { c
                     switch (response.status) {
                         case 400:
                             toast.error("Invalid data was provided.");
+                            break;
+                        case 500:
+                            toast.error("Internal server error occurred.");
                             break;
                         default:
                             toast.error("An error occurred while marking attendance.");
