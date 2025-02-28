@@ -5,7 +5,7 @@ export const metadata: Metadata = {
     description: "Student Screen",
 };
 
-export default function CourseLayout({ children }: { children: React.ReactNode }) {
+export default function StudentLayout({ children }: { children: React.ReactNode }) {
     return (
         <div className="pe-4 ps-8">
             {children}
