@@ -42,7 +42,7 @@ export default function AddUpdateForm({ children, defaultValues, mode, updateNom
     const [courses, setCourses] = useState<CourseModel[]>([]);
 
     const onNominate = (formData: FormData) => {
-        post<CRModel | null>('https://localhost:7177/api/cr/nominatecr', JSON.stringify(formData),
+        post<CRModel | null>('https://localhost:7177/api/cr/', JSON.stringify(formData),
             (data) => {
                 if (!data) return;
                 toast.success(`${data.firstName} ${data.lastName} has been nominated as CR.`);
@@ -159,7 +159,7 @@ export function get<T>(url: string, cb: (data: T) => void, token: string) {
             cb(data);
         })
         .catch((err) => {
-            console.error("Error in get request\n", err);
+            console.    error("Error in get request\n", err);
         });
 }
 

@@ -51,6 +51,10 @@ export const formSchema = z.object({
     section: z
         .string()
         .min(1, { message: "You must give a section." }),
+        
+    email: z
+        .string()
+        .email()
 });
 type studentModel = z.infer<typeof formSchema>;
 
@@ -208,7 +212,7 @@ export function StudentForm({
                                         <FormMessage />
                                     </FormItem>
                                 )
-                            }}
+                            }}  
                         />
 
                         <FormField
@@ -237,6 +241,20 @@ export function StudentForm({
                                 </FormItem>
                             )}
                         />
+
+                        <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Email</FormLabel>
+                                    <FormControl>
+                                        <Input type="email" placeholder="student@college.com"    {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />  
                         <FormField
                             control={form.control}
                             name="session"
