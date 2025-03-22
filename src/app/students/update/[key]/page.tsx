@@ -13,6 +13,7 @@ export default async function UpdateStudentPage({ params }: { params: Promise<{ 
         const res = await fetch(`https://localhost:7177/api/Student/GetStudentById/${key}`)
         if (res.ok) student = await res.json();
         else throw new Error("Failed to fetch student");
+        console.log("✅ ", student);
     }
     catch(err){
         console.error("❌ ", err);
