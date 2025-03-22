@@ -105,6 +105,21 @@ export default function StudentGrid({ students, nominees, token }: { students: S
             cell: ({ row }) => <div className="ml-7">{row.getValue("lastName")}</div>,
         },
         {
+            accessorKey: "email",
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                    >
+                        Email
+                        <ArrowUpDown />
+                    </Button>
+                )
+            },
+            cell: ({ row }) => <div className="ml-7">{row.getValue("email")}</div>,
+        },
+        {
             accessorKey: "collegeRollNo",
             header: "College Roll No",
             cell: ({ row }) => (
