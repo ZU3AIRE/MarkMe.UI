@@ -21,7 +21,18 @@ export type CourseDropdownModel = {
     courseName: string;
 }
 
-export interface AttendanceResponse{
+export class AttendnaceStatusModel {
+    Id!: number;
+    Status!: string;
+}
+export interface AttendanceResponse {
     message?: string;
     invalidRollNumbers?: string[];
 }
+
+export const ATTENDANCE_STATUS: AttendnaceStatusModel[] = [
+    { Id: 1, Status: "Absent" },
+    { Id: 2, Status: "Present" },
+    { Id: 3, Status: "Leave" },
+    { Id: 4, Status: "Late" },
+]
