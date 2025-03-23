@@ -19,7 +19,7 @@ import {
 import { ArrowUpDown } from "lucide-react"
 import React, { useState } from "react"
 
-import { AttendanceResponse, CourseDropdownModel, IAttendance } from '@/app/models/attendance'
+import { ATTENDANCE_STATUS, AttendanceResponse, CourseDropdownModel, IAttendance } from '@/app/models/attendance'
 import { SmartSelect } from "@/components/re-useables"
 import {
     Table,
@@ -29,8 +29,8 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import MarkAttendance from './form';
 import { toast } from "sonner"
+import MarkAttendance from './form'
 
 const columns: ColumnDef<IAttendance>[] = [
     {
@@ -125,8 +125,6 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
         React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
 
-
-
     const table = useReactTable({
         data,
         columns,
@@ -171,6 +169,11 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
                     throw new Error("Failed to fetch attendances");
             })
             .then((data: IAttendance[]) => {
+                data = data.map((a) => {
+                    a.dateMarked = new Date(a.dateMarked).toLocaleString();
+                    a.status = ATTENDANCE_STATUS.find((s) => s.Id === parseInt(a.status))?.Status || a.status;
+                    return a;
+                });
                 setAttendance(data);
             })
     }
