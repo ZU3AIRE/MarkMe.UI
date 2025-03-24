@@ -42,7 +42,7 @@ export default function AddUpdateForm({ children, defaultValues, mode, updateNom
     const [courses, setCourses] = useState<CourseModel[]>([]);
 
     const onNominate = (formData: FormData) => {
-        post<CRModel | null>('https://localhost:7177/api/cr/', JSON.stringify(formData),
+        post<CRModel | null>('https://localhost:7177/api/cr/nominatecr', JSON.stringify(formData),
             (data) => {
                 if (!data) return;
                 toast.success(`${data.firstName} ${data.lastName} has been nominated as CR.`);
@@ -53,13 +53,22 @@ export default function AddUpdateForm({ children, defaultValues, mode, updateNom
     }
 
     const onUpdate = (formData: FormData) => {
-        postOnly('https://localhost:7177/api/cr/updatecr', JSON.stringify(formData),
-            () => {
-                toast.success(`${updateNominee?.firstName} ${updateNominee?.lastName} has been updated successfully.`);
+        const submitType = (document.activeElement as HTMLButtonElement).innerText.toLowerCase();
+        
+        if (submitType === 'delete') {
+            get<boolean>(`https://localhost:7177/api/cr/deletecr/${updateNominee?.studentId}`, () => {
+                toast.success(`${updateNominee?.firstName} ${updateNominee?.lastName} has been deleted successfully.`);
                 onSuccess();
-            },
-            token
-        )
+            }, token);
+        } else {
+            postOnly('https://localhost:7177/api/cr/updatecr', JSON.stringify(formData),
+                () => {
+                    toast.success(`${updateNominee?.firstName} ${updateNominee?.lastName} has been updated successfully.`);
+                    onSuccess();
+                },
+                token
+            );
+        }
     }
 
     useEffect(() => {
