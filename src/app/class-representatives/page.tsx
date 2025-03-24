@@ -18,7 +18,7 @@ const ClassRepresentatives = async () => {
     const token = await getToken({ template: 'mark_me_backend_api' });
     if (token === null) return null;
 
-    const crs: CRModel[] = await get('https://localhost:7177/api/cr/getallcrs', token);
+    const crs: CRModel[] = await get(`${process.env.NEXT_PUBLIC_BASE_URL}cr/getallcrs`, token);
     return (
         <>
             <div className="pe-4 ps-8">

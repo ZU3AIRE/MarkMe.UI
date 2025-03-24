@@ -10,7 +10,7 @@ export default async function UpdateStudentPage({ params }: { params: Promise<{ 
     const key = (await params).key;
     let student: Student = { ...DEFAULT_STUDENT };
     try{
-        const res = await fetch(`https://localhost:7177/api/Student/GetStudentById/${key}`)
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Student/GetStudentById/${key}`)
         if (res.ok) student = await res.json();
         else throw new Error("Failed to fetch student");
         console.log("✅ ", student);

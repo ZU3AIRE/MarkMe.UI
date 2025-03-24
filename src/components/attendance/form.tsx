@@ -19,7 +19,7 @@ export default function MarkAttendance({ courses, handleMarkAttend, token }: { c
     }
 
     const markAttendance = () => {
-        const data = fetch(`https://localhost:7177/api/Attendance/AddAttendance`, {
+        const data = fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Attendance/AddAttendance`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
