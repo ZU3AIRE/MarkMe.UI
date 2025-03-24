@@ -55,7 +55,7 @@ export default function CourseForm({ defaultValue, mode }: { defaultValue?: Cour
     const router = useRouter();
     const onSubmit = (formData: courseModel) => {
         if (mode === 'create') {
-            fetch('https://localhost:7177/api/Course/CreateCourse', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(formData) })
+            fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Course/CreateCourse`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(formData) })
                 .then(response => {
                     if (!response.ok) {
                         switch (response.status) {
@@ -82,7 +82,7 @@ export default function CourseForm({ defaultValue, mode }: { defaultValue?: Cour
                 });
         }
         else {
-            fetch(`https://localhost:7177/api/Course/UpdateCourse/${defaultValue?.courseId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({ courseId: defaultValue?.courseId, ...formData }) })
+            fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Course/UpdateCourse/${defaultValue?.courseId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({ courseId: defaultValue?.courseId, ...formData }) })
                 .then(response => {
                     if (!response.ok) {
                         switch (response.status) {

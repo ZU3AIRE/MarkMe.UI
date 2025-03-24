@@ -5,7 +5,7 @@ export default async function Courses() {
   let data: CourseModel[] = [];
 
   try {
-    const res = await fetch('https://localhost:7177/api/Course/GetAllCourses');
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Course/GetAllCourses`);
     if(res.ok) data = await res.json();
     else throw new Error("Failed to fetch courses");
   }

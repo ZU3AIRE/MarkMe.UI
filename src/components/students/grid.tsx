@@ -268,7 +268,7 @@ export default function StudentGrid({ students, nominees, token }: { students: S
     })
 
     const onSuccess = () => {
-        fetch('https://localhost:7177/api/Student/GetCRNominees')
+        fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Student/GetCRNominees`)
             .then(res => {
                 if (!res.ok) {
                     switch (res.status) {
@@ -294,7 +294,7 @@ export default function StudentGrid({ students, nominees, token }: { students: S
     }
 
     const onStudentDeleted = (student: Student) => {
-        fetch(`https://localhost:7177/api/Student/DeleteStudent/${student.studentId}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' } })
+        fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Student/DeleteStudent/${student.studentId}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' } })
             .then(response => {
                 if (!response.ok) {
                     switch (response.status) {
@@ -314,7 +314,7 @@ export default function StudentGrid({ students, nominees, token }: { students: S
                 toast.warning(`${student.firstName} deleted successfully!`);
                 console.log("✅ Updated: ", data);
                 setIsDeleteModalOpen(false);
-                fetch('https://localhost:7177/api/Student/GetAllStudents')
+                fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Student/GetAllStudents`)
                     .then(res => {
                         if (!res.ok) {
                             switch (res.status) {

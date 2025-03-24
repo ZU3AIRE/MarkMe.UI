@@ -16,7 +16,7 @@ const CRMainGrid = ({ classRepresentatives, token }: { classRepresentatives: CRM
     const [crs, setCrs] = useState<CRModel[]>(classRepresentatives);
 
     const loadCRs = () => {
-        get<CRModel[]>('https://localhost:7177/api/cr/getallcrs',
+        get<CRModel[]>(`${process.env.NEXT_PUBLIC_BASE_URL}cr/getallcrs`,
             (data) => {
                 setCrs(data);
             }, token);
@@ -29,7 +29,7 @@ const CRMainGrid = ({ classRepresentatives, token }: { classRepresentatives: CRM
 
 
     const toggleActive = (studentId: number, name: string, isDisabled: boolean): void => {
-        get<CRModel[]>(`https://localhost:7177/api/cr/toggleactive/${studentId}/${isDisabled}`, (data) => {
+        get<CRModel[]>(`${process.env.NEXT_PUBLIC_BASE_URL}cr/toggleactive/${studentId}/${isDisabled}`, (data) => {
             if (isDisabled) toast.warning(`${name} has been disabled.`); else toast.success(`${name} has been enabled.`);
             setCrs(data)
         }, token)

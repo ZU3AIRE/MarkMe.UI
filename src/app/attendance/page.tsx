@@ -10,7 +10,7 @@ export default async function Attendance() {
     if (token === null) return null;
 
     try {
-        const res = await fetch('https://localhost:7177/api/Attendance/GetCourses', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Attendance/GetCourses`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -23,7 +23,7 @@ export default async function Attendance() {
     }
 
     try {
-        const attendanceRes = await fetch('https://localhost:7177/api/Attendance/GetAllAttendance', {
+        const attendanceRes = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Attendance/GetAllAttendance`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }

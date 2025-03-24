@@ -203,7 +203,7 @@ export default function CourseGrid({ courses }: { courses: CourseModel[] }) {
     });
 
     const onCourseDeleted = (course: CourseModel) => {
-        fetch(`https://localhost:7177/api/Course/DeleteCourse/${course.courseId}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' } })
+        fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Course/DeleteCourse/${course.courseId}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' } })
             .then(response => {
                 if (!response.ok) {
                     switch (response.status) {
@@ -223,7 +223,7 @@ export default function CourseGrid({ courses }: { courses: CourseModel[] }) {
                 toast.warning(`${course.title} deleted successfully!`);
                 console.log("✅ Updated: ", data);
                 setIsDeleteModalOpen(false);
-                fetch('https://localhost:7177/api/Course/GetAllCourses')
+                fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Course/GetAllCourses`)
                     .then(res => {
                         if (!res.ok) {
                             switch (res.status) {
