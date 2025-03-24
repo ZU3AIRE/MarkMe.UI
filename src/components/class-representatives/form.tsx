@@ -42,7 +42,7 @@ export default function AddUpdateForm({ children, defaultValues, mode, updateNom
     const [courses, setCourses] = useState<CourseModel[]>([]);
 
     const onNominate = (formData: FormData) => {
-        post<CRModel | null>('https://localhost:7177/api/cr/nominatecr', JSON.stringify(formData),
+        post<CRModel | null>(`${process.env.NEXT_PUBLIC_BASE_URL}cr/nominatecr`, JSON.stringify(formData),
             (data) => {
                 if (!data) return;
                 toast.success(`${data.firstName} ${data.lastName} has been nominated as CR.`);
@@ -53,13 +53,22 @@ export default function AddUpdateForm({ children, defaultValues, mode, updateNom
     }
 
     const onUpdate = (formData: FormData) => {
-        postOnly('https://localhost:7177/api/cr/updatecr', JSON.stringify(formData),
-            () => {
-                toast.success(`${updateNominee?.firstName} ${updateNominee?.lastName} has been updated successfully.`);
+        const submitType = (document.activeElement as HTMLButtonElement).innerText.toLowerCase();
+        
+        if (submitType === 'delete') {
+            get<boolean>(`${process.env.NEXT_PUBLIC_BASE_URL}cr/deletecr/${updateNominee?.studentId}`, () => {
+                toast.success(`${updateNominee?.firstName} ${updateNominee?.lastName} has been deleted successfully.`);
                 onSuccess();
-            },
-            token
-        )
+            }, token);
+        } else {
+            postOnly(`${process.env.NEXT_PUBLIC_BASE_URL}cr/updatecr`, JSON.stringify(formData),
+                () => {
+                    toast.success(`${updateNominee?.firstName} ${updateNominee?.lastName} has been updated successfully.`);
+                    onSuccess();
+                },
+                token
+            );
+        }
     }
 
     useEffect(() => {
@@ -144,10 +153,10 @@ export default function AddUpdateForm({ children, defaultValues, mode, updateNom
 
 
 const loadNominees = (setter: (data: StudentModel[]) => void, token: string) =>
-    get<StudentModel[]>('https://localhost:7177/api/student/getcrnominees', setter, token);
+    get<StudentModel[]>(`${process.env.NEXT_PUBLIC_BASE_URL}student/getcrnominees`, setter, token);
 
 const loadCourses = (setter: (data: CourseModel[]) => void, token: string) =>
-    get<CourseModel[]>('https://localhost:7177/api/course/getallcourses', setter, token);
+    get<CourseModel[]>(`${process.env.NEXT_PUBLIC_BASE_URL}course/getallcourses`, setter, token);
 
 export function get<T>(url: string, cb: (data: T) => void, token: string) {
     fetch(url, { headers: { Authorization: `Bearer ${token}` } })
@@ -159,7 +168,7 @@ export function get<T>(url: string, cb: (data: T) => void, token: string) {
             cb(data);
         })
         .catch((err) => {
-            console.error("Error in get request\n", err);
+            console.    error("Error in get request\n", err);
         });
 }
 

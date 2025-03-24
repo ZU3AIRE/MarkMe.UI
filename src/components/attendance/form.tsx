@@ -1,24 +1,25 @@
-import { CourseDropdownModel } from "@/app/models/attendance";
+import { ATTENDANCE_STATUS, CourseDropdownModel } from "@/app/models/attendance";
 import React from "react";
+import { toast } from "sonner";
+import { AttendanceResponse } from '../../app/models/attendance';
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { toast } from "sonner";
-import { AttendanceResponse } from '../../app/models/attendance';
 
 export default function MarkAttendance({ courses, handleMarkAttend, token }: { courses: CourseDropdownModel[], handleMarkAttend: (data: AttendanceResponse) => void, token: string }) {
     // States
     const [studentsRollNos, setRollNo] = React.useState<string>("")
     const [courseId, setCourseId] = React.useState<string>("")
+    const [AttendanceStatus, setStatus] = React.useState<string>("")
 
     const body = {
         CourseId: courseId === "" ? 0 : parseInt(courseId),
-        StudentsRollNos: studentsRollNos
+        StudentsRollNos: studentsRollNos,
+        Status: parseInt(AttendanceStatus)
     }
 
     const markAttendance = () => {
-        console.log(body);
-        const data = fetch(`https://localhost:7177/api/Attendance/AddAttendance`, {
+        const data = fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Attendance/AddAttendance`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -69,11 +70,26 @@ export default function MarkAttendance({ courses, handleMarkAttend, token }: { c
                         ))}
                     </SelectContent>
                 </Select>
+                <Select
+                    onValueChange={(value) => setStatus(value)}
+                >
+                    <SelectTrigger className="w-[450px]">
+                        <SelectValue placeholder="Select Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {ATTENDANCE_STATUS.map((s) => (
+                            <SelectItem key={s.Id} value={s.Id.toString()}
+                            >
+                                {s.Status}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
                 <Input className="w-[450px]" placeholder="Enter comma separated roll numbers"
                     value={studentsRollNos}
                     onChange={(e) => setRollNo(e.target.value)}
                 />
-                <Button onClick={markAttendance} > Mark Attendance</Button>
+                <Button onClick={markAttendance} disabled={!courseId || !AttendanceStatus || !studentsRollNos}> Mark Attendance</Button>
             </div>
         </div>
 

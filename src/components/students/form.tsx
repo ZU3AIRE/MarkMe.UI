@@ -51,6 +51,10 @@ export const formSchema = z.object({
     section: z
         .string()
         .min(1, { message: "You must give a section." }),
+
+    email: z
+        .string()
+        .email()
 });
 type studentModel = z.infer<typeof formSchema>;
 
@@ -61,7 +65,7 @@ export function StudentForm({
     const router = useRouter();
     const onSubmit = (formData: studentModel) => {
         if (mode === 'create') {
-            fetch('https://localhost:7177/api/Student/CreateStudent', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(formData) })
+            fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Student/CreateStudent`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(formData) })
                 .then(response => {
                     if (!response.ok) {
                         switch (response.status) {
@@ -88,7 +92,7 @@ export function StudentForm({
                 });
         }
         else {
-            fetch(`https://localhost:7177/api/Student/UpdateStudent/${defaultValue?.studentId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({ ...formData, studentId: defaultValue?.studentId }) })
+            fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Student/UpdateStudent/${defaultValue?.studentId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({ ...formData, studentId: defaultValue?.studentId }) })
                 .then(response => {
                     if (!response.ok) {
                         switch (response.status) {
@@ -232,6 +236,20 @@ export function StudentForm({
                                     <FormLabel>Last Name</FormLabel>
                                     <FormControl>
                                         <Input type="text" placeholder="Doe" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Email</FormLabel>
+                                    <FormControl>
+                                        <Input type="email" placeholder="student@college.com"    {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

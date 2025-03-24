@@ -9,7 +9,7 @@ export default async function Students() {
     const token = await getToken({ template: 'mark_me_backend_api' });
     if (token === null) return null;
     try {
-        const res = await fetch('https://localhost:7177/api/Student/GetAllStudents',)
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Student/GetAllStudents`,)
         if (res.ok) {
             data = await res.json();
             data.map(student => {
@@ -19,7 +19,7 @@ export default async function Students() {
         }
         else throw new Error("Failed to fetch students");
 
-        const respon = await fetch('https://localhost:7177/api/Student/GetCRNominees',)
+        const respon = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Student/GetCRNominees`,)
         if (respon.ok) {
             nomies = await respon.json();
             nomies.map(student => {

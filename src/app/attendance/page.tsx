@@ -1,6 +1,6 @@
 import AttendanceGrid from "@/components/attendance/grid";
 import { auth } from "@clerk/nextjs/server";
-import { CourseDropdownModel, IAttendance } from "../models/attendance";
+import { ATTENDANCE_STATUS, CourseDropdownModel, IAttendance } from "../models/attendance";
 
 export default async function Attendance() {
     let data: CourseDropdownModel[] = [];
@@ -10,7 +10,7 @@ export default async function Attendance() {
     if (token === null) return null;
 
     try {
-        const res = await fetch('https://localhost:7177/api/Attendance/GetCourses', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Attendance/GetCourses`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -23,7 +23,7 @@ export default async function Attendance() {
     }
 
     try {
-        const attendanceRes = await fetch('https://localhost:7177/api/Attendance/GetAllAttendance', {
+        const attendanceRes = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Attendance/GetAllAttendance`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -36,6 +36,7 @@ export default async function Attendance() {
     }
     attendances = attendances.map((a) => {
         a.dateMarked = new Date(a.dateMarked).toLocaleString();
+        a.status = ATTENDANCE_STATUS.find((s) => s.Id === parseInt(a.status))?.Status || a.status;
         return a;
     });
     return (<>

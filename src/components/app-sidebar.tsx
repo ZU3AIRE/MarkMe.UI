@@ -77,7 +77,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const token = await fetchToken();
     if (!token) return;
     await get<Menu[]>(
-      "https://localhost:7177/api/UserPermission/GetMenus",
+      `${process.env.NEXT_PUBLIC_BASE_URL}UserPermission/GetMenus`,
       (results) =>
         setMenus((prev) => [
           {

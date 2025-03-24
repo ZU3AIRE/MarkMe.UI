@@ -40,6 +40,7 @@ export default function UpdateCr({ student, courseIds, onSuccess: _onSuccess, to
                     <AddUpdateForm token={token} onSuccess={onSuccess} defaultValues={defaultValues} mode={"update"} updateNominee={{ ...DEFAULT_STUDENT, firstName: student.firstName, lastName: student.lastName, studentId: student.studentId }}>
                         <footer className="space-x-4 text-end">
                             <Button variant="outline" onClick={() => setOpen(false)} type="button">Cancel</Button>
+                            <Button variant="destructive" onClick={() => setOpen(false)} type="submit">Delete</Button>
                             <Button type="submit">Update</Button>
                         </footer>
                     </AddUpdateForm>

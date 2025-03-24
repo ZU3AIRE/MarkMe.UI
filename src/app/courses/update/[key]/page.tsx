@@ -11,7 +11,7 @@ export default async function UpdateCoursePage({ params }: { params: Promise<{ k
   let data: CourseModel = { ...DEFAULT_COURSE };
 
   try {
-    const res = await fetch(`https://localhost:7177/api/Course/GetCourseById/${key}`);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Course/GetCourseById/${key}`);
     if (res.ok) data = await res.json();
     else throw new Error("Failed to fetch course");
   }

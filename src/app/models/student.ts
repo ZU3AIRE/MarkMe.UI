@@ -8,6 +8,7 @@ export class Student {
     lastName: string;
     session: string;
     section: string;
+    email: string;
 
     constructor(
         collegeRollNo: string,
@@ -17,6 +18,7 @@ export class Student {
         lastName: string,
         session: string,
         section: string,
+        email: string
     ) {
         this.studentId = Math.floor(Math.random() * 1000);
         this.collegeRollNo = collegeRollNo;
@@ -26,6 +28,7 @@ export class Student {
         this.lastName = lastName;
         this.session = session;
         this.section = section;
+        this.email = email;
     }
 }
 
@@ -38,4 +41,5 @@ export const DEFAULT_STUDENT: Student = {
     registrationNo: "",
     session: "",
     section: "",
+    email: ""
 };
