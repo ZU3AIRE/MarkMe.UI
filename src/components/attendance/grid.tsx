@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
+import { format } from "date-fns"
 import {
     Column,
     ColumnDef,
@@ -112,10 +113,78 @@ const columns: ColumnDef<IAttendance>[] = [
     },
 ]
 export default function AttendanceGrid({ courses, attendances, token }: { courses: CourseDropdownModel[], attendances: IAttendance[], token: string }) {
-    const [data, setAttendance] = useState<IAttendance[]>(attendances)
-    const dateString = getTodaysDate()
-    const [date, setDate] = React.useState<Date | undefined>(new Date())
+    const [data, setAttendance] = useState<IAttendance[]>(attendances);
+    const dateString = getTodaysDate();
+    const [date, setDate] = React.useState<Date | undefined>(new Date());
+    const [dateRange, setDateRange] = React.useState<{ startDate?: Date; endDate?: Date }>({});
 
+    const handleDate = (date: Date | undefined) => {
+        if (date) {
+            setDate(date);
+            fetchAttendanceByDate(date);
+        }
+    };
+
+    const handleDateRange = (range: { startDate?: Date; endDate?: Date }) => {
+        setDateRange(range);
+        if (range.startDate && range.endDate) {
+            fetchAttendanceByDateRange(range.startDate, range.endDate);
+        }
+    };
+
+    const fetchAttendanceByDate = (date: Date) => {
+        const formattedDate = format(date, "yyyy-MM-dd");
+        fetch(`https://localhost:7177/api/Attendance/GetAttendanceByDate/${formattedDate}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+        })
+            .then(response => {
+                if (response.ok) return response.json();
+                else throw new Error("Failed to fetch attendance by date");
+            })
+            .then((data: IAttendance[]) => {
+                updateAttendanceData(data);
+            })
+            .catch(error => {
+                toast.error(error.message);
+            });
+    };
+
+    const fetchAttendanceByDateRange = (startDate: Date, endDate: Date) => {
+        const formattedStartDate = format(startDate, "yyyy-MM-dd");
+        const formattedEndDate = format(endDate, "yyyy-MM-dd");
+        fetch(`https://localhost:7177/api/Attendance/GetAttendanceByDateRange?startDate=${formattedStartDate}&endDate=${formattedEndDate}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+        })
+            .then(response => {
+                if (response.ok) return response.json();
+                else throw new Error("Failed to fetch attendance by date range");
+            })
+            .then((data: IAttendance[]) => {
+                updateAttendanceData(data);
+            })
+            .catch(error => {
+                toast.error(error.message);
+            });
+    };
+
+    const updateAttendanceData = (data: IAttendance[]) => {
+        const updatedData = data.map((a) => {
+            a.dateMarked = new Date(a.dateMarked).toLocaleString();
+            a.status = ATTENDANCE_STATUS.find((s) => s.Id === parseInt(a.status))?.Status || a.status;
+            return a;
+        });
+        setAttendance(updatedData);
+    };
 
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -180,7 +249,7 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
 
     return (
         <div className="pe-4 ps-8">
-            <div className="flex flex-row justify-between w-full  gap-4">
+            <div className="flex flex-row justify-between w-full gap-4">
                 <div>
                     <h2 className="scroll-m-20 text-2xl font-extrabold italic tracking-tight text-muted-foreground lg:text-md">{dateString}</h2>
                 </div>
@@ -189,7 +258,7 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
                     <Calendar
                         mode="single"
                         selected={date}
-                        onSelect={setDate}
+                        onSelect={handleDate}
                         className="rounded-md border"
                     />
                 </div>
