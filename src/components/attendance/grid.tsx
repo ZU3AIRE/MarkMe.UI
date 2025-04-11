@@ -32,6 +32,8 @@ import {
 } from "@/components/ui/table"
 import { toast } from "sonner"
 import MarkAttendance from './form'
+import { DateRange } from "react-day-picker"
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 
 const columns: ColumnDef<IAttendance>[] = [
     {
@@ -116,7 +118,7 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
     const [data, setAttendance] = useState<IAttendance[]>(attendances);
     const dateString = getTodaysDate();
     const [date, setDate] = React.useState<Date | undefined>(new Date());
-    const [dateRange, setDateRange] = React.useState<{ startDate?: Date; endDate?: Date }>({});
+    // const [dateRange, setDateRange] = React.useState<{ startDate?: Date; endDate?: Date }>({});
 
     const handleDate = (date: Date | undefined) => {
         if (date) {
@@ -125,16 +127,30 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
         }
     };
 
-    const handleDateRange = (range: { startDate?: Date; endDate?: Date }) => {
+    const [dateRange, setDateRange] = useState<DateRange | undefined>({
+        from: undefined,
+        to: undefined,
+    });
+
+    const handleDateRangeChange = (range: DateRange | undefined) => {
         setDateRange(range);
-        if (range.startDate && range.endDate) {
-            fetchAttendanceByDateRange(range.startDate, range.endDate);
+        if (range?.from && range?.to) {
+            fetchAttendanceByDateRange(range.from, range.to);
         }
     };
 
+    // const handleDateRange = (range: DateRange | undefined) => {
+    //     if (range) {
+    //         setDateRange({ startDate: range?.from, endDate: range?.to });
+    //         if (range?.from && range?.to) {
+    //             fetchAttendanceByDateRange(range.from, range.to);
+    //         }
+    //     }
+    // };
+
     const fetchAttendanceByDate = (date: Date) => {
         const formattedDate = format(date, "yyyy-MM-dd");
-        fetch(`https://localhost:7177/api/Attendance/GetAttendanceByDate/${formattedDate}`, {
+        fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Attendance/GetAttendanceByDate/${formattedDate}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -157,7 +173,7 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
     const fetchAttendanceByDateRange = (startDate: Date, endDate: Date) => {
         const formattedStartDate = format(startDate, "yyyy-MM-dd");
         const formattedEndDate = format(endDate, "yyyy-MM-dd");
-        fetch(`https://localhost:7177/api/Attendance/GetAttendanceByDateRange?startDate=${formattedStartDate}&endDate=${formattedEndDate}`, {
+        fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Attendance/GetAttendanceByDateRange?startDate=${formattedStartDate}&endDate=${formattedEndDate}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -261,6 +277,23 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
                         onSelect={handleDate}
                         className="rounded-md border"
                     />
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button variant="outline">
+                                {dateRange?.from
+                                    ? `${format(dateRange.from, "MMM dd, yyyy")} - ${dateRange.to ? format(dateRange.to, "MMM dd, yyyy") : "Select"}`
+                                    : "Select Date Range"}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                            <Calendar
+                                mode="range"
+                                selected={dateRange}
+                                onSelect={handleDateRangeChange}
+                                numberOfMonths={2}
+                            />
+                        </PopoverContent>
+                    </Popover>
                 </div>
             </div>
             <div>
