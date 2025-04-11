@@ -299,11 +299,9 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
             <div>
                 <div className="flex items-center py-4">
                     <Input
-                        placeholder="Filter by university roll number"
-                        value={(table.getColumn("universityRollNo")?.getFilterValue() as string) ?? ""}
-                        onChange={(event) =>
-                            table.getColumn("universityRollNo")?.setFilterValue(event.target.value)
-                        }
+                        placeholder="Search..."
+                        value={(table.getState().globalFilter as string) ?? ""}
+                        onChange={(event) => table.setGlobalFilter(event.target.value)}
                         className="max-w-sm"
                     />
                     <div className="ml-auto">
