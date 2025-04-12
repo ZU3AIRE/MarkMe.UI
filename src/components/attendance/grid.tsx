@@ -118,7 +118,6 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
     const [data, setAttendance] = useState<IAttendance[]>(attendances);
     const dateString = getTodaysDate();
     const [date, setDate] = React.useState<Date | undefined>(new Date());
-    // const [dateRange, setDateRange] = React.useState<{ startDate?: Date; endDate?: Date }>({});
 
     const handleDate = (date: Date | undefined) => {
         if (date) {
@@ -138,15 +137,6 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
             fetchAttendanceByDateRange(range.from, range.to);
         }
     };
-
-    // const handleDateRange = (range: DateRange | undefined) => {
-    //     if (range) {
-    //         setDateRange({ startDate: range?.from, endDate: range?.to });
-    //         if (range?.from && range?.to) {
-    //             fetchAttendanceByDateRange(range.from, range.to);
-    //         }
-    //     }
-    // };
 
     const fetchAttendanceByDate = (date: Date) => {
         const formattedDate = format(date, "yyyy-MM-dd");
