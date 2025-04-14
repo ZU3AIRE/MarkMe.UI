@@ -154,7 +154,7 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
             toast.success(response.message);
         }
 
-        fetch('https://localhost:7177/api/Attendance/GetAllAttendance', {
+        fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Attendance/GetAllAttendance`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
