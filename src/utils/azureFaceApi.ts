@@ -1,3 +1,34 @@
+interface FaceDetectionResponse {
+  faceId: string;
+  faceRectangle: {
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+  };
+  faceAttributes?: {
+    age: number;
+    gender: string;
+    smile?: number;
+    headPose?: {
+      pitch: number;
+      roll: number;
+      yaw: number;
+    };
+    emotion?: {
+      anger: number;
+      contempt: number;
+      disgust: number;
+      fear: number;
+      happiness: number;
+      neutral: number;
+      sadness: number;
+      surprise: number;
+    };
+    [key: string]: number | string | object | undefined;
+  };
+}
+
 const AZURE_FACE_KEY = 'DSGpId23g854Ql5QmVK0uWN8Y19uhdDk3ROU8F6UGebcIK0D2cVQJQQJ99BDACYeBjFXJ3w3AAAKACOGf5Py'
 const AZURE_FACE_ENDPOINT = 'https://markmefaceapibymousa.cognitiveservices.azure.com/'
 
@@ -5,7 +36,7 @@ const PERSON_GROUP_ID = 'myfacegroup';
 const API_ENDPOINT = AZURE_FACE_ENDPOINT;
 const API_KEY = AZURE_FACE_KEY;
 
-export async function detectFaces(imageData: string): Promise<any[]> {
+export async function detectFaces(imageData: string): Promise<FaceDetectionResponse[]> {
   const base64Data = imageData.replace(/^data:image\/jpeg;base64,/, '');
   
   try {

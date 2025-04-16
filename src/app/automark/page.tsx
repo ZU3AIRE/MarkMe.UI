@@ -1,7 +1,7 @@
 "use client"
 import AttendanceList from "@/components/AttendanceList";
 import VideoStream from "@/components/VideoStream";
-import styles from "./../../../styles/Home.module.css";
+import styles from "@/styles/Home.module.css";
 import { useState } from "react";
 
 
