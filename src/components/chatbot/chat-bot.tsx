@@ -128,25 +128,103 @@ export default function Chatbot({ token }: { token: string }) {
                 {messages.map((message, index) => (
                     <div
                         key={index}
-                        className={`mb-6 ${message.type === "user" ? "flex justify-end" : ""
-                            }`}
+                        className={`mb-6 ${message.type === "user" ? "flex justify-end" : ""}`}
                     >
-                        <div className={`flex items-start gap-3 ${message.type === "user" ? "flex-row-reverse" : ""
-                            }`}>
+                        <div className={`flex items-start gap-3 ${message.type === "user" ? "flex-row-reverse" : ""}`}>
                             <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${message.type === "bot"
-                                    ? "bg-gray-700 text-white"
-                                    : "bg-blue-500 text-white"
-                                }`}>
+                                ? "bg-gray-700 text-white"
+                                : "bg-blue-500 text-white"
+                            }`}>
                                 {message.type === "bot" ? <Bot size={16} /> : <User size={16} />}
                             </div>
 
-                            <div className={`rounded-lg py-2 ${message.type === "user"
-                                    ? "text-right"
-                                    : ""
-                                } max-w-[75%]`}>
-                                <pre className="whitespace-pre-wrap font-sans text-left">
-                                    {message.text}
-                                </pre>
+                            <div className={`rounded-lg py-2 ${message.type === "user" ? "text-right" : ""} max-w-[75%]`}>
+                                {(() => {
+                                    // Try to parse as JSON, if fails, just show as text
+                                    let parsed: any;
+                                    try {
+                                        parsed = JSON.parse(message.text);
+                                    } catch {
+                                        parsed = null;
+                                    }
+
+                                    if (
+                                        parsed &&
+                                        typeof parsed === "object" &&
+                                        parsed !== null &&
+                                        (Array.isArray(parsed.data) || Array.isArray(parsed))
+                                    ) {
+                                        // If parsed.data is an array, use it; else if parsed is array, use it
+                                        const rows = Array.isArray(parsed.data) ? parsed.data : parsed;
+                                        if (rows.length === 0) {
+                                            return <pre className="whitespace-pre-wrap font-sans text-left">No data found.</pre>;
+                                        }
+                                        // Get all unique keys from all objects
+                                        const columns = Array.from(
+                                            rows.reduce((set: Set<string>, row: any) => {
+                                                Object.keys(row).forEach((k) => set.add(k));
+                                                return set;
+                                            }, new Set<string>())
+                                        );
+                                        return (
+                                            <div className="overflow-x-auto">
+                                                <table className="min-w-full text-xs border border-gray-200">
+                                                    <thead>
+                                                        <tr>
+                                                            {columns.map((col : any) => (
+                                                                <th key={col} className="border px-2 py-1 bg-gray-100 font-semibold text-gray-700">
+                                                                    {col}
+                                                                </th>
+                                                            ))}
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {rows.map((row: any, i: number) => (
+                                                            <tr key={i}>
+                                                                {columns.map((col: any) => (
+                                                                    <td key={col} className="border px-2 py-1">
+                                                                        {row[col] !== undefined && row[col] !== null
+                                                                            ? String(row[col])
+                                                                            : ""}
+                                                                    </td>
+                                                                ))}
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        );
+                                    } else if (
+                                        parsed &&
+                                        typeof parsed === "object" &&
+                                        parsed !== null &&
+                                        !Array.isArray(parsed)
+                                    ) {
+                                        // If it's a single object, show as key-value table
+                                        const entries = Object.entries(parsed);
+                                        return (
+                                            <div className="overflow-x-auto">
+                                                <table className="min-w-full text-xs border border-gray-200">
+                                                    <tbody>
+                                                        {entries.map(([key, value]) => (
+                                                            <tr key={key}>
+                                                                <th className="border px-2 py-1 bg-gray-100 text-gray-700 text-left">{key}</th>
+                                                                <td className="border px-2 py-1">{String(value)}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        );
+                                    } else {
+                                        // Just show as text
+                                        return (
+                                            <pre className="whitespace-pre-wrap font-sans text-left">
+                                                {message.text}
+                                            </pre>
+                                        );
+                                    }
+                                })()}
                             </div>
                         </div>
                     </div>
