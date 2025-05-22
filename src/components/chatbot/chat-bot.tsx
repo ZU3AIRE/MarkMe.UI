@@ -1,9 +1,19 @@
 "use client";
 import { Bot, Send, Trash, User } from "lucide-react";
+import { format } from "date-fns";
 import { useEffect, useRef, useState } from "react";
 
+type MessageType = "user" | "bot";
+
+interface Message {
+    type: MessageType;
+    text: string;
+}
+
+type ParsedData = Record<string, unknown> | { data: Record<string, unknown>[] } | unknown[] | null;
+
 export default function Chatbot({ token }: { token: string }) {
-    const [messages, setMessages] = useState([
+    const [messages, setMessages] = useState<Message[]>([
         { type: "bot", text: "Hello! How can I assist you today?" },
     ]);
     const [input, setInput] = useState("");
@@ -102,12 +112,32 @@ export default function Chatbot({ token }: { token: string }) {
         }
     }, []);
 
+    // Helper function to check if a value is a date string
+    const isDateString = (value: unknown): boolean => {
+        if (typeof value !== "string") return false;
+        // Simple ISO date check (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss)
+        return /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|([+-]\d{2}:\d{2}))?)?$/.test(value);
+    };
+
+    // Helper function to format date strings
+    const formatDate = (value: string): string => {
+        try {
+            const date = new Date(value);
+            if (!isNaN(date.getTime())) {
+                return format(date, "PPpp");
+            }
+            return value;
+        } catch {
+            return value;
+        }
+    };
+
     return (
         <div className="relative flex flex-col h-full w-full bg-gray-50 text-gray-800 overflow-hidden">
             {/* Header */}
             <div className="border-b border-gray-200 bg-white p-4 shadow-sm flex-shrink-0 z-10">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-xl font-semibold">Attendance AI Assistant</h1>
+                    <h1 className="text-xl font-semibold">AI Powered Attendance Reporting</h1>
                     <div className="flex gap-2">
                         <button
                             onClick={clearChat}
@@ -140,8 +170,7 @@ export default function Chatbot({ token }: { token: string }) {
 
                             <div className={`rounded-lg py-2 ${message.type === "user" ? "text-right" : ""} max-w-[75%]`}>
                                 {(() => {
-                                    // Try to parse as JSON, if fails, just show as text
-                                    let parsed: any;
+                                    let parsed: ParsedData;
                                     try {
                                         parsed = JSON.parse(message.text);
                                     } catch {
@@ -152,42 +181,59 @@ export default function Chatbot({ token }: { token: string }) {
                                         parsed &&
                                         typeof parsed === "object" &&
                                         parsed !== null &&
-                                        (Array.isArray(parsed.data) || Array.isArray(parsed))
+                                        (Array.isArray((parsed as { data?: unknown[] }).data) || Array.isArray(parsed))
                                     ) {
-                                        // If parsed.data is an array, use it; else if parsed is array, use it
-                                        const rows = Array.isArray(parsed.data) ? parsed.data : parsed;
+                                        const rows = Array.isArray((parsed as { data?: unknown[] }).data)
+                                            ? (parsed as { data: unknown[] }).data
+                                            : (parsed as unknown[]);
                                         if (rows.length === 0) {
                                             return <pre className="whitespace-pre-wrap font-sans text-left">No data found.</pre>;
                                         }
-                                        // Get all unique keys from all objects
                                         const columns = Array.from(
-                                            rows.reduce((set: Set<string>, row: any) => {
-                                                Object.keys(row).forEach((k) => set.add(k));
+                                            rows.reduce((set: Set<string>, row) => {
+                                                if (typeof row === "object" && row !== null) {
+                                                    Object.keys(row).forEach((k) => set.add(k));
+                                                }
                                                 return set;
                                             }, new Set<string>())
                                         );
                                         return (
                                             <div className="overflow-x-auto">
-                                                <table className="min-w-full text-xs border border-gray-200">
+                                                <table className="min-w-full border border-border rounded-xl shadow-sm bg-card text-card-foreground">
                                                     <thead>
                                                         <tr>
-                                                            {columns.map((col : any) => (
-                                                                <th key={col} className="border px-2 py-1 bg-gray-100 font-semibold text-gray-700">
+                                                            {columns.map((col) => (
+                                                                <th
+                                                                    key={col}
+                                                                    className="px-4 py-2 bg-muted text-muted-foreground font-semibold border-b border-border first:rounded-tl-xl last:rounded-tr-xl"
+                                                                >
                                                                     {col}
                                                                 </th>
                                                             ))}
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        {rows.map((row: any, i: number) => (
-                                                            <tr key={i}>
-                                                                {columns.map((col: any) => (
-                                                                    <td key={col} className="border px-2 py-1">
-                                                                        {row[col] !== undefined && row[col] !== null
-                                                                            ? String(row[col])
-                                                                            : ""}
-                                                                    </td>
-                                                                ))}
+                                                        {rows.map((row, i) => (
+                                                            <tr
+                                                                key={i}
+                                                                className="hover:bg-muted/60 transition-colors"
+                                                            >
+                                                                {columns.map((col) => {
+                                                                    const value =
+                                                                        typeof row === "object" && row !== null
+                                                                            ? (row as Record<string, unknown>)[col]
+                                                                            : "";
+                                                                    return (
+                                                                        <td
+                                                                            key={col}
+                                                                            className="px-4 py-2 border-b border-border"
+                                                                        >
+                                                                            {typeof value === "string" && isDateString(value)
+                                                                                ? formatDate(value)
+                                                                                : String(value ?? "")}
+                                                                        </td>
+                                                                    );
+                                                                })}
                                                             </tr>
                                                         ))}
                                                     </tbody>
@@ -200,16 +246,21 @@ export default function Chatbot({ token }: { token: string }) {
                                         parsed !== null &&
                                         !Array.isArray(parsed)
                                     ) {
-                                        // If it's a single object, show as key-value table
-                                        const entries = Object.entries(parsed);
+                                        const entries = Object.entries(parsed as Record<string, unknown>);
                                         return (
                                             <div className="overflow-x-auto">
-                                                <table className="min-w-full text-xs border border-gray-200">
+                                                <table className="min-w-[300px] border border-border rounded-xl shadow-sm bg-card text-card-foreground">
                                                     <tbody>
                                                         {entries.map(([key, value]) => (
-                                                            <tr key={key}>
-                                                                <th className="border px-2 py-1 bg-gray-100 text-gray-700 text-left">{key}</th>
-                                                                <td className="border px-2 py-1">{String(value)}</td>
+                                                            <tr key={key} className="hover:bg-muted/60 transition-colors">
+                                                                <th className="px-4 py-2 bg-muted text-muted-foreground font-semibold text-left border-b border-border rounded-l-xl">
+                                                                    {key}
+                                                                </th>
+                                                                <td className="px-4 py-2 border-b border-border rounded-r-xl">
+                                                                    {typeof value === "string" && isDateString(value)
+                                                                        ? formatDate(value)
+                                                                        : String(value ?? "")}
+                                                                </td>
                                                             </tr>
                                                         ))}
                                                     </tbody>
@@ -217,7 +268,6 @@ export default function Chatbot({ token }: { token: string }) {
                                             </div>
                                         );
                                     } else {
-                                        // Just show as text
                                         return (
                                             <pre className="whitespace-pre-wrap font-sans text-left">
                                                 {message.text}
