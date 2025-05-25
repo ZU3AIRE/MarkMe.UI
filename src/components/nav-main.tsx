@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { ChevronRight, LucideIcon } from "lucide-react";
-import { usePathname } from "next/navigation";
 
 export function NavMain({
   items,
@@ -25,21 +24,16 @@ export function NavMain({
     }[];
   }[];
 }) {
-  const path = usePathname();
   return (
     <SidebarGroup>
-      {/* <SidebarGroupLabel>Platform</SidebarGroupLabel> */}
       <SidebarMenu>
         {items?.map((item, index) => (
           <div key={index}>
             <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
             {item.items?.map((subitem, index) => (
-              <SidebarMenuItem key={index} className="mb-1">
-                <SidebarMenuButton
-                  asChild
-                  tooltip={subitem.title}
-                  className={path.includes(subitem.url) ? "bg-gray-200" : ""}>
-                  <span className="cursor-pointer select-none">
+              <SidebarMenuItem key={index}>
+                <SidebarMenuButton asChild tooltip={subitem.title}>
+                  <span>
                     <ChevronRight />
                     <Link href={subitem.url}>
                       <span>{subitem.title}</span>
