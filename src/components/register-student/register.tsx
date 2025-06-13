@@ -10,6 +10,7 @@ import {
   SelectItem,
 } from "../ui/select";
 import { toast } from "sonner";
+import Image from "next/image";
 
 export default function RegisterStudentFace({ studentsData, token }: { studentsData: StudentDropDown[], token: string }) {
   const [images, setImages] = useState<File[]>([]);
@@ -158,8 +159,17 @@ export default function RegisterStudentFace({ studentsData, token }: { studentsD
               {images.map((img, idx) => (
                 <span
                   key={idx}
-                  className="text-xs bg-gray-100 px-2 py-1 rounded"
+                  className="flex flex-col items-center text-xs bg-gray-100 px-2 py-1 rounded"
                 >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <Image
+                    src={URL.createObjectURL(img)}
+                    alt={img.name}
+                    width={64}
+                    height={64}
+                    className="w-16 h-16 object-cover rounded mb-1 border"
+                    style={{ maxWidth: 64, maxHeight: 64 }}
+                  />
                   {img.name}
                 </span>
               ))}
