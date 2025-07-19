@@ -10,7 +10,7 @@ import { Column, ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, get
 import { ArrowUpDown, CircleXIcon, PlusIcon, SquarePen, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 import { toast } from "sonner"
 import NominateCR from "./nominate"
 
@@ -32,6 +32,9 @@ export default function StudentGrid({ students, nominees, token }: { students: S
     const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
     const [selectedForDeletion, setSelectedStudentForDeletion] = React.useState<Student>(DEFAULT_STUDENT);
     const [StudentId, setStudentId] = React.useState<number>(0);
+
+    // Bulk delete modal state
+    const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
 
     const columns: ColumnDef<Student>[] = [
         {
@@ -343,6 +346,44 @@ export default function StudentGrid({ students, nominees, token }: { students: S
                 console.log('🐛 ', error);
             });
     }
+
+    const selectedRows = table.getSelectedRowModel().rows;
+    const selectedStudents = useMemo(
+        () => selectedRows.map(row => row.original) as Student[] || [],
+        [selectedRows]
+    );
+
+    const handleBulkDelete = async () => {
+        if (!selectedStudents.length) return;
+        try {
+            const ids = selectedStudents.map(student => student.studentId);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Student/BulkDeleteStudents`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify(ids),
+            });
+            if (!response.ok) {
+                toast.error("Failed to delete students.");
+                return;
+            }
+            toast.success(`${selectedStudents.length} student(s) deleted successfully!`);
+            // Refresh data
+            fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Student/GetAllStudents`)
+                .then(res => res.ok ? res.json() : [])
+                .then(res => {
+                    res.map((std: Student) => {
+                        std.registrationNo = std.registrationNo.slice(0, 4) + '-' + std.registrationNo.slice(4, 7) + '-' + std.registrationNo.slice(7, 10);
+                        std.session = std.session.slice(0, 4) + '-' + std.session.slice(4, 8);
+                    });
+                    setData(res);
+                });
+            setIsBulkDeleteModalOpen(false);
+            setRowSelection({});
+        } catch {
+            toast.error("An error occurred while deleting students.");
+        }
+    };
+
     return (
         <>
             <NominateCR onSuccess={onSuccess} token={token} open={isNominate} setOpen={setNominamteModalOpen} studentId={StudentId} />
@@ -351,11 +392,21 @@ export default function StudentGrid({ students, nominees, token }: { students: S
                     <h1 className="text-2xl font-semibold">
                         Students
                     </h1>
-                    <Link href="/students/new" >
-                        <Button>
-                            <PlusIcon /> Add
-                        </Button>
-                    </Link>
+                    <div className="flex gap-2">
+                        <Link href="/students/new" >
+                            <Button>
+                                <PlusIcon /> Add
+                            </Button>
+                        </Link>
+                        {Object.keys(rowSelection).length > 0 && (
+                            <Button
+                                variant="destructive"
+                                onClick={() => setIsBulkDeleteModalOpen(true)}
+                            >
+                                <Trash2 className="mr-2" /> Bulk Delete
+                            </Button>
+                        )}
+                    </div>
                 </div>
                 <div className="flex items-center py-4">
                     <Input
@@ -466,6 +517,28 @@ export default function StudentGrid({ students, nominees, token }: { students: S
                     </div>
                 </div>
             </div>
+
+            {/* Bulk Delete Dialog */}
+            <Dialog open={isBulkDeleteModalOpen} onOpenChange={setIsBulkDeleteModalOpen}>
+                <DialogContent className="lg:max-w-[30vw] max-h-[65vh] overflow-y-auto p-6 rounded-lg shadow-lg">
+                    <DialogHeader>
+                        <DialogTitle>Bulk Delete Students</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to delete <b>{selectedStudents.length}</b> student(s)?
+                        </DialogDescription>
+                    </DialogHeader>
+                    <footer className="text-end h-8">
+                        <Button onClick={() => setIsBulkDeleteModalOpen(false)}>
+                            <CircleXIcon />
+                            No
+                        </Button>{" "}
+                        <Button onClick={handleBulkDelete} variant="destructive">
+                            <Trash2 />
+                            Yes, Delete
+                        </Button>
+                    </footer>
+                </DialogContent>
+            </Dialog>
 
             {/* Delete Student Dialog */}
             <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
