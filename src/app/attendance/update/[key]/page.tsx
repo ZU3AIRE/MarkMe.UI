@@ -1,4 +1,4 @@
-import { CourseDropdownModel, DEFAULT_ATTENDANCE, IAttendance } from "@/app/models/attendance";
+import { ATTENDANCE_STATUS, CourseDropdownModel, DEFAULT_ATTENDANCE, IAttendance } from "@/app/models/attendance";
 import AttendanceEditForm from "@/components/attendance/update";
 import { auth } from "@clerk/nextjs/server";
 import { Metadata } from "next";
@@ -42,6 +42,8 @@ export default async function UpdateAttendancePage({ params }: { params: Promise
     catch (err) {
         console.error("❌ ", err);
     }
+        data.dateMarked = new Date(data.dateMarked).toLocaleString();
+        data.status = ATTENDANCE_STATUS.find((s) => s.Id === parseInt(data.status))?.Status || data.status;
 
     return (
         <AttendanceEditForm defaultValue={data} token={token} courses={courseOptions} />

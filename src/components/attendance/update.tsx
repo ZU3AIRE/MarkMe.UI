@@ -85,7 +85,7 @@ export default function AttendanceUpdateForm({
                     AttendanceId: defaultValue?.attendanceId,
                     CourseId: parseInt(formData.courseId),
                     Status: formData.status,
-                    DateMarked: formData.dateMarked.toISOString(),
+                    DateMarked: formData.dateMarked,
                 }),
             }
         )
@@ -128,30 +128,26 @@ export default function AttendanceUpdateForm({
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}>
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-4 lg:gap-6">
-                        {/* Read-only College Roll No */}
+                        {/* College Roll No (Read-only, styled like dropdown) */}
                         <FormItem>
                             <FormLabel>College Roll No</FormLabel>
                             <FormControl>
-                                <input
-                                    type="text"
-                                    className="input input-bordered w-full bg-gray-100 cursor-not-allowed"
-                                    value={defaultValue?.collegeRollNo ?? ""}
-                                    readOnly
-                                    disabled
-                                />
+                                <div className="relative">
+                                    <div className="flex items-center rounded-md border border-input bg-gray-100 px-3 py-2 text-sm text-muted-foreground h-9 cursor-not-allowed">
+                                        {defaultValue?.collegeRollNo ?? ""}
+                                    </div>
+                                </div>
                             </FormControl>
                         </FormItem>
-                        {/* Read-only Name */}
+                        {/* Name (Read-only, styled like dropdown) */}
                         <FormItem>
                             <FormLabel>Name</FormLabel>
                             <FormControl>
-                                <input
-                                    type="text"
-                                    className="input input-bordered w-full bg-gray-100 cursor-not-allowed"
-                                    value={defaultValue?.name ?? ""}
-                                    readOnly
-                                    disabled
-                                />
+                                <div className="relative">
+                                    <div className="flex items-center rounded-md border border-input bg-gray-100 px-3 py-2 text-sm text-muted-foreground h-9 cursor-not-allowed">
+                                        {defaultValue?.name ?? ""}
+                                    </div>
+                                </div>
                             </FormControl>
                         </FormItem>
                         {/* Course Dropdown */}
@@ -220,13 +216,16 @@ export default function AttendanceUpdateForm({
                                 <FormItem>
                                     <FormLabel>Date</FormLabel>
                                     <FormControl>
-                                        <Calendar
-                                            mode="single"
-                                            selected={field.value}
-                                            onSelect={field.onChange}
-                                            className="rounded-md border"
-                                            disabled={(date) => isAfter(date, new Date())}
-                                        />
+                                        <div className="flex flex-row gap-4">
+                                            <Calendar
+                                                mode="single"
+                                                selected={field.value}
+                                                onSelect={field.onChange}
+                                                className="rounded-md border"
+                                                disabled={(date) => isAfter(date, new Date())}
+                                                initialFocus={false}
+                                            />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
