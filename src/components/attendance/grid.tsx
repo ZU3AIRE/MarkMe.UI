@@ -47,7 +47,6 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
     const [rowSelection, setRowSelection] = React.useState({})
     const [data, setAttendance] = useState<IAttendance[]>(attendances);
     const dateString = getTodaysDate();
-    const [date, setDate] = React.useState<Date | undefined>(new Date());
     // Model open for deletion
     const [selectedForDeletion, setSelectedForDeletion] = useState<IAttendance | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -58,14 +57,6 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
         from: undefined,
         to: undefined,
     });
-
-
-    const handleDate = (date: Date | undefined) => {
-        if (date) {
-            setDate(date);
-            fetchAttendanceByDate(date);
-        }
-    };
 
     const handleDateRangeChange = (range: DateRange | undefined) => {
         setDateRange(range);
@@ -81,28 +72,6 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
             return a;
         });
         setAttendance(updatedData);
-    };
-
-    const fetchAttendanceByDate = (date: Date) => {
-        const formattedDate = format(date, "yyyy-MM-dd");
-        fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Attendance/GetAttendanceByDate/${formattedDate}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-        })
-            .then(response => {
-                if (response.ok) return response.json();
-                else throw new Error("Failed to fetch attendance by date");
-            })
-            .then((data: IAttendance[]) => {
-                updateAttendanceData(data);
-            })
-            .catch(error => {
-                toast.error(error.message);
-            });
     };
 
     const fetchAttendanceByDateRange = (startDate: Date, endDate: Date) => {
@@ -428,12 +397,6 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
                 </div>
                 <div className="flex flex-row gap-4">
                     <MarkAttendance courses={courses} handleMarkAttend={markedAttendance} token={token}></MarkAttendance>
-                    <Calendar
-                        mode="single"
-                        selected={date}
-                        onSelect={handleDate}
-                        className="rounded-md border"
-                    />
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button variant="outline">

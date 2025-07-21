@@ -16,14 +16,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeftIcon } from "lucide-react";
-import Link from "next/link";
+import { isAfter } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { isAfter } from "date-fns";
 import { AttendnaceStatusModel } from '../../app/models/attendance';
 
 const formSchema = z.object({
@@ -72,6 +70,18 @@ export default function AttendanceUpdateForm({
     });
 
     const onSubmit = (formData: AttendanceUpdateModel) => {
+        // Combine selected date with current time
+        const selectedDate = formData.dateMarked;
+        const now = new Date();
+        const dateMarked = new Date(
+            selectedDate.getFullYear(),
+            selectedDate.getMonth(),
+            selectedDate.getDate(),
+            now.getHours(),
+            now.getMinutes(),
+            now.getSeconds(),
+            now.getMilliseconds()
+        );
         fetch(
             `${process.env.NEXT_PUBLIC_BASE_URL}Attendance/UpdateAttendance/${defaultValue?.attendanceId}`,
             {
@@ -84,9 +94,9 @@ export default function AttendanceUpdateForm({
                 body: JSON.stringify({
                     AttendanceId: defaultValue?.attendanceId,
                     CourseId: parseInt(formData.courseId),
-                    Status: formData.status,
-                    DateMarked: formData.dateMarked,
-                }),
+                    AttendanceStatus: ATTENDANCE_STATUS.find((s) => s.Status === formData.status)?.Id || 0,
+                    DateMarked: dateMarked.toISOString(),
+                })
             }
         )
             .then((response) => {
@@ -114,139 +124,144 @@ export default function AttendanceUpdateForm({
     };
 
     return (
-        <>
-            <div className="flex items-center justify-between align-start py-4">
-                <div>
-                    <h1 className="text-2xl font-semibold">Update Attendance</h1>
-                </div>
-                <Link href="/attendance">
-                    <Button variant="outline">
-                        <ArrowLeftIcon /> Back
-                    </Button>
-                </Link>
-            </div>
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)}>
-                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-4 lg:gap-6">
-                        {/* College Roll No (Read-only, styled like dropdown) */}
-                        <FormItem>
-                            <FormLabel>College Roll No</FormLabel>
-                            <FormControl>
-                                <div className="relative">
-                                    <div className="flex items-center rounded-md border border-input bg-gray-100 px-3 py-2 text-sm text-muted-foreground h-9 cursor-not-allowed">
-                                        {defaultValue?.collegeRollNo ?? ""}
-                                    </div>
-                                </div>
-                            </FormControl>
-                        </FormItem>
-                        {/* Name (Read-only, styled like dropdown) */}
-                        <FormItem>
-                            <FormLabel>Name</FormLabel>
-                            <FormControl>
-                                <div className="relative">
-                                    <div className="flex items-center rounded-md border border-input bg-gray-100 px-3 py-2 text-sm text-muted-foreground h-9 cursor-not-allowed">
-                                        {defaultValue?.name ?? ""}
-                                    </div>
-                                </div>
-                            </FormControl>
-                        </FormItem>
-                        {/* Course Dropdown */}
-                        <FormField
-                            control={form.control}
-                            name="courseId"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Course</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value}
-                                        defaultValue={field.value}
-                                    >
+        <div className="flex items-center justify-center min-h-[80vh]">
+            <div className="w-full max-w-3xl">
+                <div className="bg-white rounded-lg p-8 shadow-md w-full">
+                    <h2 className="text-2xl font-semibold text-center mb-8">Update Attendance</h2>
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)}>
+                            <div className="flex flex-col md:flex-row gap-12">
+                                {/* Left side: Fields */}
+                                <div className="flex-1 min-w-[260px] flex flex-col gap-6">
+                                    {/* College Roll No */}
+                                    <FormItem>
+                                        <FormLabel>College Roll No</FormLabel>
                                         <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select a course" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {courseOptions.map((course) => (
-                                                <SelectItem value={course.courseId.toString()} key={course.courseId}>
-                                                    {course.courseName}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        {/* Status Dropdown */}
-                        <FormField
-                            control={form.control}
-                            name="status"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Status</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value}
-                                        defaultValue={field.value}
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select status" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {statusOptions.map((status) => (
-                                                <SelectItem value={status.Status} key={status.Id}>
-                                                    {status.Status}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        {/* Calendar Date Picker */}
-                        <FormField
-                            control={form.control}
-                            name="dateMarked"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Date</FormLabel>
-                                    <FormControl>
-                                        <div className="flex flex-row gap-4">
-                                            <Calendar
-                                                mode="single"
-                                                selected={field.value}
-                                                onSelect={field.onChange}
-                                                className="rounded-md border"
-                                                disabled={(date) => isAfter(date, new Date())}
-                                                initialFocus={false}
+                                            <input
+                                                type="text"
+                                                className="rounded-md border border-input bg-gray-100 px-3 py-2 text-sm text-muted-foreground h-10 cursor-not-allowed w-full"
+                                                value={defaultValue?.collegeRollNo ?? ""}
+                                                readOnly
+                                                disabled
                                             />
-                                        </div>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <div className="col-span-1 sm:col-span-3 flex justify-end">
-                            <Button
-                                type="button"
-                                className="w-[128px]"
-                                variant="outline"
-                                onClick={() => router.push("/attendance")}
-                            >
-                                Cancel
-                            </Button>
-                            <Button type="submit" className="w-[128px] ms-4">
-                                Update
-                            </Button>
-                        </div>
-                    </div>
-                </form>
-            </Form>
-        </>
+                                        </FormControl>
+                                    </FormItem>
+                                    {/* Name */}
+                                    <FormItem>
+                                        <FormLabel>Name</FormLabel>
+                                        <FormControl>
+                                            <input
+                                                type="text"
+                                                className="rounded-md border border-input bg-gray-100 px-3 py-2 text-sm text-muted-foreground h-10 cursor-not-allowed w-full"
+                                                value={defaultValue?.name ?? ""}
+                                                readOnly
+                                                disabled
+                                            />
+                                        </FormControl>
+                                    </FormItem>
+                                    {/* Course Dropdown */}
+                                    <FormField
+                                        control={form.control}
+                                        name="courseId"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Course</FormLabel>
+                                                <Select
+                                                    onValueChange={field.onChange}
+                                                    value={field.value}
+                                                    defaultValue={field.value}
+                                                >
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select a course" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        {courseOptions.map((course) => (
+                                                            <SelectItem value={course.courseId.toString()} key={course.courseId}>
+                                                                {course.courseName}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    {/* Status Dropdown */}
+                                    <FormField
+                                        control={form.control}
+                                        name="status"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Status</FormLabel>
+                                                <Select
+                                                    onValueChange={field.onChange}
+                                                    value={field.value}
+                                                    defaultValue={field.value}
+                                                >
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select status" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        {statusOptions.map((s) => (
+                                                            <SelectItem key={s.Id} value={s.Status}>
+                                                                {s.Status}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                {/* Right side: Calendar and buttons */}
+                                <div className="flex flex-col items-center gap-4 min-w-[320px]">
+                                    <FormField
+                                        control={form.control}
+                                        name="dateMarked"
+                                        render={({ field }) => (
+                                            <FormItem className="w-full flex flex-col items-center">
+                                                <FormLabel className="mb-2">Date</FormLabel>
+                                                <FormControl>
+                                                    <div>
+                                                        <Calendar
+                                                            mode="single"
+                                                            selected={field.value}
+                                                            onSelect={field.onChange}
+                                                            className="rounded-md border"
+                                                            disabled={(date) =>
+                                                                isAfter(date, new Date()) || date.getDay() === 0
+                                                            }
+                                                        />
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <div className="flex justify-center gap-4 w-full mt-4">
+                                        <Button
+                                            type="button"
+                                            className="w-[128px]"
+                                            variant="outline"
+                                            onClick={() => router.push("/attendance")}
+                                        >
+                                            Cancel
+                                        </Button>
+                                        <Button type="submit" className="w-[128px] ms-4">
+                                            Update
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </Form>
+                </div>
+            </div>
+        </div>
     );
 }

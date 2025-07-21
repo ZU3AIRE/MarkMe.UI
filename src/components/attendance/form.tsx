@@ -5,17 +5,20 @@ import { AttendanceResponse } from '../../app/models/attendance';
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Calendar } from "../ui/calendar";
 
 export default function MarkAttendance({ courses, handleMarkAttend, token }: { courses: CourseDropdownModel[], handleMarkAttend: (data: AttendanceResponse) => void, token: string }) {
     // States
     const [studentsRollNos, setRollNo] = React.useState<string>("")
     const [courseId, setCourseId] = React.useState<string>("")
     const [AttendanceStatus, setStatus] = React.useState<string>("")
+    const [dateMarked, setDateMarked] = React.useState<Date | undefined>(new Date());
 
     const body = {
         CourseId: courseId === "" ? 0 : parseInt(courseId),
         StudentsRollNos: studentsRollNos,
-        Status: parseInt(AttendanceStatus)
+        Status: parseInt(AttendanceStatus),
+        DateMarked: dateMarked ? dateMarked.toISOString().slice(0, 10) : undefined // Send as "YYYY-MM-DD"
     }
 
     const markAttendance = () => {
@@ -54,44 +57,56 @@ export default function MarkAttendance({ courses, handleMarkAttend, token }: { c
     }
     return (
         <div>
-            <div className="flex flex-col gap-4 items-end">
-                <Select
-                    onValueChange={(value) => setCourseId(value)}
-                >
-                    <SelectTrigger className="w-[450px]">
-                        <SelectValue placeholder="Select Course" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {courses.map((c) => (
-                            <SelectItem key={c.courseId} value={c.courseId.toString()}
-                            >
-                                {c.courseCode} - {c.courseName}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                <Select
-                    onValueChange={(value) => setStatus(value)}
-                >
-                    <SelectTrigger className="w-[450px]">
-                        <SelectValue placeholder="Select Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {ATTENDANCE_STATUS.map((s) => (
-                            <SelectItem key={s.Id} value={s.Id.toString()}
-                            >
-                                {s.Status}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                <Input className="w-[450px]" placeholder="Enter comma separated roll numbers"
-                    value={studentsRollNos}
-                    onChange={(e) => setRollNo(e.target.value)}
-                />
-                <Button onClick={markAttendance} disabled={!courseId || !AttendanceStatus || !studentsRollNos}> Mark Attendance</Button>
+            <div className="flex flex-row gap-6 items-start">
+                {/* Left side: form fields */}
+                <div className="flex flex-col gap-4 items-end">
+                    <Select
+                        onValueChange={(value) => setCourseId(value)}
+                    >
+                        <SelectTrigger className="w-[450px]">
+                            <SelectValue placeholder="Select Course" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {courses.map((c) => (
+                                <SelectItem key={c.courseId} value={c.courseId.toString()}
+                                >
+                                    {c.courseCode} - {c.courseName}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <Select
+                        onValueChange={(value) => setStatus(value)}
+                    >
+                        <SelectTrigger className="w-[450px]">
+                            <SelectValue placeholder="Select Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {ATTENDANCE_STATUS.map((s) => (
+                                <SelectItem key={s.Id} value={s.Id.toString()}
+                                >
+                                    {s.Status}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <Input className="w-[450px]" placeholder="Enter comma separated roll numbers"
+                        value={studentsRollNos}
+                        onChange={(e) => setRollNo(e.target.value)}
+                    />
+                    <Button onClick={markAttendance} disabled={!courseId || !AttendanceStatus || !studentsRollNos || !dateMarked}> Mark Attendance</Button>
+                </div>
+                {/* Right side: Calendar */}
+                <div className="flex flex-row gap-4">
+                    <Calendar
+                        mode="single"
+                        selected={dateMarked}
+                        onSelect={setDateMarked}
+                        className="rounded-md border"
+                        disabled={(date) => date > new Date() || date.getDay() === 0}
+                    />
+                </div>
             </div>
         </div>
-
     )
 }

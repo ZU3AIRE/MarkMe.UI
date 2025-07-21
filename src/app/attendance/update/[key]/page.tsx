@@ -42,8 +42,8 @@ export default async function UpdateAttendancePage({ params }: { params: Promise
     catch (err) {
         console.error("❌ ", err);
     }
-        data.dateMarked = new Date(data.dateMarked).toLocaleString();
-        data.status = ATTENDANCE_STATUS.find((s) => s.Id === parseInt(data.status))?.Status || data.status;
+    data.dateMarked = new Date(data.dateMarked).toLocaleString();
+    data.status = ATTENDANCE_STATUS.find((s) => s.Id === parseInt(data.status))?.Status || data.status;
 
     return (
         <AttendanceEditForm defaultValue={data} token={token} courses={courseOptions} />
