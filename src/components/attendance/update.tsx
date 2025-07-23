@@ -48,7 +48,6 @@ export default function AttendanceUpdateForm({
     const [courseOptions] = useState<CourseDropdownModel[]>(courses);
     const [statusOptions] = useState<AttendnaceStatusModel[]>(ATTENDANCE_STATUS);
 
-    // Parse initial date from backend (string) to Date object
     const initialDate =
         defaultValue?.dateMarked
             ? new Date(defaultValue.dateMarked)
@@ -70,7 +69,6 @@ export default function AttendanceUpdateForm({
     });
 
     const onSubmit = (formData: AttendanceUpdateModel) => {
-        // Combine selected date with current local time
         const selectedDate = formData.dateMarked;
         const now = new Date();
         const combinedDate = new Date(
@@ -82,7 +80,6 @@ export default function AttendanceUpdateForm({
             now.getSeconds()
         );
 
-        // Format as local time: "YYYY-MM-DDTHH:mm:ss"
         const pad = (n: number) => n.toString().padStart(2, "0");
         const localDateString = `${combinedDate.getFullYear()}-${pad(combinedDate.getMonth() + 1)}-${pad(combinedDate.getDate())}T${pad(combinedDate.getHours())}:${pad(combinedDate.getMinutes())}:${pad(combinedDate.getSeconds())}`;
 
@@ -99,7 +96,7 @@ export default function AttendanceUpdateForm({
                     AttendanceId: defaultValue?.attendanceId,
                     CourseId: parseInt(formData.courseId),
                     AttendanceStatus: ATTENDANCE_STATUS.find((s) => s.Status === formData.status)?.Id || 0,
-                    DateMarked: localDateString, // Send as local time string
+                    DateMarked: localDateString,
                 })
             }
         )
