@@ -9,17 +9,15 @@ export default function UpdateAttendanceLoading() {
                     <Skeleton className="h-8 w-60 mx-auto mb-8" />
                     <div className="flex flex-col md:flex-row gap-12">
                         {/* Left side: Fields and button */}
-                        <div className="flex-1 min-w-[260px] flex flex-col gap-6">
+                        <div className="flex-1 min-w-[260px] flex flex-col gap-12">
                             {/* Dropdown 1 */}
                             <Skeleton className="h-10 w-full rounded-md" />
                             {/* Dropdown 2 */}
                             <Skeleton className="h-10 w-full rounded-md" />
                             {/* Dropdown 3 */}
                             <Skeleton className="h-10 w-full rounded-md" />
-                            {/* Submit Button */}
-                            <div className="flex justify-start">
-                                <Skeleton className="h-10 w-32 rounded-md mt-2" />
-                            </div>
+                            {/* Dropdown 4 */}
+                            <Skeleton className="h-10 w-full rounded-md" />
                         </div>
                         {/* Right side: Calendar and button */}
                         <div className="flex flex-col items-center w-full min-w-[320px]">
@@ -28,6 +26,7 @@ export default function UpdateAttendanceLoading() {
                             {/* Button to the right of calendar */}
                             <div className="flex justify-end w-full">
                                 <Skeleton className="h-10 w-32 rounded-md" />
+                                <Skeleton className="h-10 w-32 rounded-md ml-4" />
                             </div>
                         </div>
                     </div>

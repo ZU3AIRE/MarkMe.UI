@@ -2,22 +2,32 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Loading() {
     return (
-        <div className="pe-4 ps-8">
+        <>
             {/* Header */}
-            <div className="flex flex-row justify-between w-full gap-4 mb-6">
+            <div className="flex flex-row justify-between gap-4">
                 <Skeleton className="h-8 w-48" />
-                <div className="flex flex-row gap-4">
-                    {/* Two dropdowns */}
-                    <Skeleton className="h-10 w-48 rounded-md" />
-                    <Skeleton className="h-10 w-48 rounded-md" />
-                    {/* Textbox */}
-                    <Skeleton className="h-10 w-56 rounded-md" />
-                    {/* Calendar */}
-                    <Skeleton className="h-5 w-20 mb-2" />
-                    <Skeleton className="h-56 w-full" />
-                    {/* Date range button */}
-                    <Skeleton className="h-10 w-40 rounded-md" />
+            {/* Top Section: Form and Calendar */}
+            <div className="flex flex-row justify-center gap-12">
+                {/* Left side: Form fields */}
+                <div className="flex flex-col gap-4 min-w-[450px]">
+                    {/* Course Dropdown */}
+                    <Skeleton className="h-0 w-full rounded-md" />
+                    {/* Status Dropdown */}
+                    <Skeleton className="h-10 w-full rounded-md" />
+                    {/* Roll Numbers Input */}
+                    <Skeleton className="h-10 w-full rounded-md" />
+                    <Skeleton className="h-10 w-full rounded-md" />
+                    {/* Mark Attendance Button */}
+                    <Skeleton className="h-10 w-40 rounded-md self-end" />
                 </div>
+                {/* Right side: Calendar */}
+                <div className="flex flex-col items-center min-w-[280px] w-[100px]">
+                    <Skeleton className="h-[340px] w-full rounded-md mb-4" />
+                </div>
+                                <div className="flex gap-2">
+                    <Skeleton className="h-9 w-32 rounded-md" />
+                </div>
+            </div>
             </div>
             {/* Search and controls */}
             <div className="flex items-center py-4 gap-2">
@@ -29,15 +39,6 @@ export default function Loading() {
                 </div>
             </div>
             {/* Table */}
-            <div className="rounded-md border p-4 mt-2">
-            <div className="flex items-center justify-between py-4">
-                <Skeleton className="h-[35px] w-[220px] rounded-md" />
-                <Skeleton className="h-[35px] w-[100px] rounded-md" />
-            </div>
-            <div className="flex items-center py-4">
-                <Skeleton className="h-[35px] w-[385px] rounded-md" />
-                <Skeleton className="h-[35px] w-[120px] rounded-md ml-auto" />
-            </div>
             <div>
                 <Skeleton className="h-[135px] w-full rounded-md ml-auto" />
             </div>
@@ -50,7 +51,6 @@ export default function Loading() {
                     <Skeleton className="h-[30px] w-[75px] rounded-md" />
                 </div>
             </div>
-            </div>
-        </div>
+            </>
     );
 }

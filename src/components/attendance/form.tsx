@@ -14,14 +14,34 @@ export default function MarkAttendance({ courses, handleMarkAttend, token }: { c
     const [AttendanceStatus, setStatus] = React.useState<string>("")
     const [dateMarked, setDateMarked] = React.useState<Date | undefined>(new Date());
 
-    const body = {
-        CourseId: courseId === "" ? 0 : parseInt(courseId),
-        StudentsRollNos: studentsRollNos,
-        Status: parseInt(AttendanceStatus),
-        DateMarked: dateMarked ? dateMarked.toISOString().slice(0, 10) : undefined // Send as "YYYY-MM-DD"
-    }
+    const handleDate = (date: Date | undefined) => {
+        if (date) {
+            setDateMarked(date);
+        }
+    };
 
     const markAttendance = () => {
+        const now = new Date();
+        const selected = dateMarked ?? new Date();
+        const combinedDate = new Date(
+            selected.getFullYear(),
+            selected.getMonth(),
+            selected.getDate(),
+            now.getHours(),
+            now.getMinutes(),
+            now.getSeconds()
+        );
+
+        const pad = (n: number) => n.toString().padStart(2, "0");
+        const localDateString = `${combinedDate.getFullYear()}-${pad(combinedDate.getMonth() + 1)}-${pad(combinedDate.getDate())}T${pad(combinedDate.getHours())}:${pad(combinedDate.getMinutes())}:${pad(combinedDate.getSeconds())}`;
+
+        const body = {
+            CourseId: courseId === "" ? 0 : parseInt(courseId),
+            StudentsRollNos: studentsRollNos,
+            Status: parseInt(AttendanceStatus),
+            DateMarked: localDateString
+        };
+
         const data = fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Attendance/AddAttendance`, {
             method: 'POST',
             headers: {
@@ -101,7 +121,7 @@ export default function MarkAttendance({ courses, handleMarkAttend, token }: { c
                     <Calendar
                         mode="single"
                         selected={dateMarked}
-                        onSelect={setDateMarked}
+                        onSelect={handleDate}
                         className="rounded-md border"
                         disabled={(date) => date > new Date() || date.getDay() === 0}
                     />
