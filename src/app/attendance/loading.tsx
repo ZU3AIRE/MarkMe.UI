@@ -36,6 +36,9 @@ export default function Loading() {
                 <div className="flex gap-2">
                     <Skeleton className="h-9 w-32 rounded-md" />
                 </div>
+                <div className="flex gap-2">
+                    <Skeleton className="h-9 w-32 rounded-md" />
+                </div>
                 {/* Column button at the end */}
                 <div className="ml-auto flex gap-2">
                     <Skeleton className="h-9 w-32 rounded-md" />
