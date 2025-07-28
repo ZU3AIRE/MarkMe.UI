@@ -5,7 +5,7 @@ export default function Loading() {
         <>
             {/* Header */}
             <div className="flex flex-row justify-between gap-4">
-                <Skeleton className="h-5 w-48" />
+                <Skeleton className="h-8 w-48" />
                 {/* Top Section: Form and Calendar */}
                 <div className="flex flex-row justify-center gap-12">
                     {/* Left side: Form fields */}
