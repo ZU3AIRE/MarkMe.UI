@@ -60,9 +60,38 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
 
     const handleDateRangeChange = (range: DateRange | undefined) => {
         setDateRange(range);
-        if (range?.from && range?.to) {
+        if (range?.from && !range?.to) {
+            // Only one date selected, filter for that date
+            const formattedDate = format(range.from, "yyyy-MM-dd");
+            fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Attendance/GetAttendanceByDate/${formattedDate}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                })
+                .then(response => {
+                    if (response.ok) return response.json();
+                    else throw new Error("Failed to fetch attendance by date");
+                })
+                .then((data: IAttendance[]) => {
+                    updateAttendanceData(data);
+                })
+                .catch(error => {
+                    toast.error(error.message);
+                });
+        } else if (range?.from && range?.to) {
             fetchAttendanceByDateRange(range.from, range.to);
         }
+    };
+
+    // Reset filters and fetch all attendance
+    const handleResetFilters = () => {
+        setDateRange({ from: undefined, to: undefined });
+        table.setGlobalFilter("");
+        fetchAllAttendance();
     };
 
     const updateAttendanceData = (data: IAttendance[]) => {
@@ -397,6 +426,16 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
                 </div>
                 <div className="flex flex-row gap-4">
                     <MarkAttendance courses={courses} handleMarkAttend={markedAttendance} token={token}></MarkAttendance>
+                </div>
+            </div>
+            <div>
+                <div className="flex items-center py-4 gap-2">
+                    <Input
+                        placeholder="Search..."
+                        value={(table.getState().globalFilter as string) ?? ""}
+                        onChange={(event) => table.setGlobalFilter(event.target.value)}
+                        className="max-w-sm"
+                    />
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button variant="outline">
@@ -414,16 +453,17 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
                             />
                         </PopoverContent>
                     </Popover>
-                </div>
-            </div>
-            <div>
-                <div className="flex items-center py-4 gap-2">
-                    <Input
-                        placeholder="Search..."
-                        value={(table.getState().globalFilter as string) ?? ""}
-                        onChange={(event) => table.setGlobalFilter(event.target.value)}
-                        className="max-w-sm"
-                    />
+                    {/* Reset Button: Only show if filters are active */}
+                    {((dateRange?.from || dateRange?.to) || (table.getState().globalFilter && (table.getState().globalFilter as string).length > 0)) && (
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            className="ml-2"
+                            onClick={handleResetFilters}
+                        >
+                            Reset Filters
+                        </Button>
+                    )}
                     <div className="ml-auto">
                         <SmartSelect
                             items={

@@ -24,15 +24,15 @@ export default function Loading() {
                 <div className="flex flex-col items-center min-w-[280px] w-[100px]">
                     <Skeleton className="h-[340px] w-full rounded-md mb-4" />
                 </div>
-                                <div className="flex gap-2">
-                    <Skeleton className="h-9 w-32 rounded-md" />
-                </div>
             </div>
             </div>
             {/* Search and controls */}
             <div className="flex items-center py-4 gap-2">
                 {/* Search bar */}
                 <Skeleton className="h-9 w-64 rounded-md" />
+                <div className="flex gap-2">
+                    <Skeleton className="h-9 w-32 rounded-md" />
+                </div>
                 {/* Column button at the end */}
                 <div className="ml-auto flex gap-2">
                     <Skeleton className="h-9 w-32 rounded-md" />
