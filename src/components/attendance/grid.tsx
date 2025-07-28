@@ -36,6 +36,7 @@ import { DateRange } from "react-day-picker"
 import { toast } from "sonner"
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 import MarkAttendance from './form'
+import { exportToExcel } from "@/utils/exportToExcel";
 
 export default function AttendanceGrid({ courses, attendances, token }: { courses: CourseDropdownModel[], attendances: IAttendance[], token: string }) {
     const [sorting, setSorting] = React.useState<SortingState>([])
@@ -418,6 +419,13 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
             });
     }
 
+    // Export filtered data to Excel
+    const handleExportToExcel = () => {
+        const filteredRows = table.getFilteredRowModel().rows.map(row => row.original);
+
+        exportToExcel(filteredRows, "attendance.xlsx");
+    };
+
     return (
         <div className="pe-4 ps-8">
             <div className="flex flex-row justify-between w-full gap-4">
@@ -456,14 +464,21 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
                     {/* Reset Button: Only show if filters are active */}
                     {((dateRange?.from || dateRange?.to) || (table.getState().globalFilter && (table.getState().globalFilter as string).length > 0)) && (
                         <Button
-                            variant="secondary"
-                            size="sm"
+                            variant="outline"
                             className="ml-2"
                             onClick={handleResetFilters}
                         >
                             Reset Filters
                         </Button>
                     )}
+                    {/* Export to Excel Button */}
+                    <Button
+                        size="sm"
+                        className="ml-2"
+                        onClick={handleExportToExcel}
+                    >
+                        Export to Excel
+                    </Button>
                     <div className="ml-auto">
                         <SmartSelect
                             items={
@@ -491,12 +506,10 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
                     {table.getFilteredSelectedRowModel().rows.length > 0 && (
                         <Button
                             variant="destructive"
-                            size="sm"
-                            className="ml-2 flex items-center gap-1"
                             onClick={() => setShowDeleteDialog(true)}
                             disabled={isDeleting}
                         >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 />
                             {isDeleting ? "Deleting..." : "Delete Selected"}
                         </Button>
                     )}
