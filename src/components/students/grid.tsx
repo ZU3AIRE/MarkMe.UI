@@ -13,6 +13,7 @@ import { redirect } from "next/navigation"
 import React, { useMemo, useState } from "react"
 import { toast } from "sonner"
 import NominateCR from "./nominate"
+import { exportToExcel } from "@/utils/exportToExcel"
 
 export default function StudentGrid({ students, nominees, token }: { students: Student[], nominees: Student[], token: string }) {
 
@@ -384,6 +385,14 @@ export default function StudentGrid({ students, nominees, token }: { students: S
         }
     };
 
+    // Export filtered data to Excel
+    const handleExportToExcel = () => {
+        const filteredRows = table.getFilteredRowModel().rows.map(row => row.original);
+
+        exportToExcel(filteredRows, "students.xlsx");
+    };
+
+
     return (
         <>
             <NominateCR onSuccess={onSuccess} token={token} open={isNominate} setOpen={setNominamteModalOpen} studentId={StudentId} />
@@ -398,17 +407,9 @@ export default function StudentGrid({ students, nominees, token }: { students: S
                                 <PlusIcon /> Add
                             </Button>
                         </Link>
-                        {Object.keys(rowSelection).length > 0 && (
-                            <Button
-                                variant="destructive"
-                                onClick={() => setIsBulkDeleteModalOpen(true)}
-                            >
-                                <Trash2 className="mr-2" /> Bulk Delete
-                            </Button>
-                        )}
                     </div>
                 </div>
-                <div className="flex items-center py-4">
+                <div className="flex items-center py-4 gap-4">
                     <Input
                         placeholder="Filter names..."
                         value={(table.getColumn("firstName")?.getFilterValue() as string) ?? ""}
@@ -417,6 +418,14 @@ export default function StudentGrid({ students, nominees, token }: { students: S
                         }
                         className="max-w-sm"
                     />
+                    {/* Export to Excel Button */}
+                    <Button
+                        size="sm"
+                        className="ml-2"
+                        onClick={handleExportToExcel}
+                    >
+                        Export to Excel
+                    </Button>
                     <div className="ml-auto">
                         <SmartSelect
                             items={
@@ -439,8 +448,15 @@ export default function StudentGrid({ students, nominees, token }: { students: S
                             variant={'outline'}
                             key={'id'}
                         ></SmartSelect>
-
                     </div>
+                    {Object.keys(rowSelection).length > 0 && (
+                        <Button
+                            variant="destructive"
+                            onClick={() => setIsBulkDeleteModalOpen(true)}
+                        >
+                            <Trash2 /> Delete Selected
+                        </Button>
+                    )}
                 </div>
                 <div className="rounded-md border">
                     <Table>

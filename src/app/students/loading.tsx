@@ -8,8 +8,9 @@ export default function Loading() {
                 <Skeleton className="h-[35px] w-[220px] rounded-md" />
                 <Skeleton className="h-[35px] w-[100px] rounded-md" />
             </div>
-            <div className="flex items-center py-4">
+            <div className="flex items-center py-4 gap-8">
                 <Skeleton className="h-[35px] w-[385px] rounded-md" />
+                <Skeleton className="h-[35px] w-[100px] rounded-md" />
                 <Skeleton className="h-[35px] w-[120px] rounded-md ml-auto" />
             </div>
             <div>
