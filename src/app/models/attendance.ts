@@ -15,6 +15,21 @@ export interface IAttendance {
     // isArchived: boolean;
 }
 
+export const DEFAULT_ATTENDANCE: IAttendance = {
+    attendanceId: 0,
+    studentId: 0,
+    courseId: 0,
+    name: '',
+    collegeRollNo: '',
+    universityRollNo: '',
+    courseCode: '',
+    courseTitle: '',
+    semester: 0,
+    dateMarked: '',
+    markedBy: '',
+    status: '',
+};
+
 export type CourseDropdownModel = {
     courseId: number;
     courseCode: string;
