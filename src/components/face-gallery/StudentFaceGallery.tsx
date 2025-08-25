@@ -50,7 +50,7 @@ export default function StudentFaceGallery({ token, students }: { token: string;
             method: 'DELETE',
         });
         if (res.ok) {
-            toast.success("Student deleted successfully");
+            toast.warning("Student deleted successfully");
         } else {
             toast.error("Failed to delete student");
         }
@@ -92,18 +92,7 @@ export default function StudentFaceGallery({ token, students }: { token: string;
                                         key={student.studentId}
                                         className="bg-white rounded-lg shadow p-4 flex flex-col items-center gap-2 border hover:shadow-lg transition"
                                     >
-                                        <div className="text-center mb-2">
-                                            <div className="font-semibold text-lg">
-                                                {student.firstName} {student.lastName}
-                                            </div>
-                                            <div className="text-xs text-gray-500 mb-1">Roll No: {student.collegeRollNo || student.universityRollNo || student.studentId}</div>
-                                            <div className="text-xs text-gray-500 mb-2">{student.email}</div>
-                                        </div>
-                                        <div className="flex gap-2 mb-2">
-                                            <Button variant="outline" size="sm" onClick={() => setUpdateDialog({ open: true, studentId: student.studentId })}>Update</Button>
-                                            <Button variant="destructive" size="sm" onClick={() => setDeleteDialog({ open: true, studentId: student.studentId })}>Delete</Button>
-                                        </div>
-                                        <div className="w-20 h-20 flex items-center justify-center border rounded-lg overflow-hidden bg-gray-100 hover:ring-2 hover:ring-blue-400 cursor-pointer"
+                                        <div className="w-20 h-20 flex items-center justify-center border rounded-lg overflow-hidden bg-gray-100 hover:ring-2 hover:ring-blue-400 cursor-pointer mb-2"
                                             onClick={() => images[0] && setSelectedImage(images[0])}
                                         >
                                             <Image
@@ -114,6 +103,17 @@ export default function StudentFaceGallery({ token, students }: { token: string;
                                                 className="object-cover w-full h-full"
                                                 priority
                                             />
+                                        </div>
+                                        <div className="text-center mb-2">
+                                            <div className="font-semibold text-lg">
+                                                {student.firstName} {student.lastName}
+                                            </div>
+                                            <div className="text-xs text-gray-500 mb-1">Roll No: {student.collegeRollNo || student.universityRollNo || student.studentId}</div>
+                                            <div className="text-xs text-gray-500 mb-2">{student.email}</div>
+                                        </div>
+                                        <div className="flex gap-2 mb-2">
+                                            <Button variant="outline" size="sm" onClick={() => setUpdateDialog({ open: true, studentId: student.studentId })}>Update</Button>
+                                            <Button variant="destructive" size="sm" onClick={() => setDeleteDialog({ open: true, studentId: student.studentId })}>Delete</Button>
                                         </div>
                                     </div>
                                 );

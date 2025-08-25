@@ -12,12 +12,12 @@ export const Breadcrumbs = () => {
         <Breadcrumb>
             <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                    {paths === "/" || paths === "/dashboard" ?
+                    {paths === "/" || paths === "/attendance" ?
                         <BreadcrumbPage>
-                            Dashboard
+                            Attendance
                         </BreadcrumbPage> :
                         <BreadcrumbLink asChild>
-                            <Link href={"/"}>Dashboard</Link>
+                            <Link href={"/"}>Attendance </Link>
                         </BreadcrumbLink>
                     }
                 </BreadcrumbItem>
@@ -27,7 +27,7 @@ export const Breadcrumbs = () => {
                         const linkName: string = link[0].toUpperCase() + link.slice(1, link.length);
                         const isLastPath: boolean = pathNames.length === index + 1;
 
-                        if (linkName === "dashboard" || href === "/dashboard") {
+                        if (linkName === "attendance" || href === "/attendance") {
                             return null;
                         }
                         return (
