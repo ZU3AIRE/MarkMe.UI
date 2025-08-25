@@ -1,7 +1,7 @@
-import Dashboard from "./dashboard/page";
+import Attendance from "./attendance/page";
 
 export default function Home() {
   return (
-    <Dashboard></Dashboard>
+    <Attendance></Attendance>
   );
 }
