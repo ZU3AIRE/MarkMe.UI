@@ -43,3 +43,8 @@ export const DEFAULT_STUDENT: Student = {
     section: "",
     email: ""
 };
+
+export class StudentDropDown{
+    studentId!: number;
+    studentName!: string
+}
