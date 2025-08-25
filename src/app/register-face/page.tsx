@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { StudentDropDown } from "../models/student";
-import RegisterStudentFace from "@/components/register-student/register";
+import RegisterStudentFace from "@/components/face-gallery/register";
 
 export default async function UploadFaceImage() {
         let students: StudentDropDown[] = [];

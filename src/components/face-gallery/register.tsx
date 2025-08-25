@@ -11,6 +11,7 @@ import {
 } from "../ui/select";
 import { toast } from "sonner";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 
 export default function RegisterStudentFace({ studentsData, token }: { studentsData: StudentDropDown[], token: string }) {
   const [images, setImages] = useState<File[]>([]);
@@ -66,8 +67,11 @@ export default function RegisterStudentFace({ studentsData, token }: { studentsD
               break;
           }
         }
-        if (response.ok)
+        if (response.ok) {
           toast.success("Face images uploaded successfully!");
+          setImages([]);
+          setSelectedStudent("");
+        }
 
         fetch(`${process.env.NEXT_PUBLIC_BASE_URL}Student/GetStudentsName`)
           .then(res => {
@@ -186,9 +190,12 @@ export default function RegisterStudentFace({ studentsData, token }: { studentsD
             </div>
           </div>
         </div>
-        <Button type="submit" className="w-full mt-2">
-          Upload Face Images
-        </Button>
+        <div className="flex gap-2 mt-2">
+          <Button type="submit" className="w-full">Upload Face Images</Button>
+          <Button type="button" variant="outline" className="w-full" onClick={() => redirect("/face-gallery")}>
+            Cancel
+          </Button>
+        </div>
       </form>
     </div>
   );
