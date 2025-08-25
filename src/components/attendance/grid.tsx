@@ -278,9 +278,6 @@ export default function AttendanceGrid({ courses, attendances, token }: { course
     })
     const markedAttendance = (response: AttendanceResponse) => {
         if (response.invalidRollNumbers?.length) {
-            if (response.message !== undefined) {
-                toast.success(response.message);
-            }
             toast.warning(`Invalid Student Roll Nos: ${response.invalidRollNumbers}`);
         }
         else {
