@@ -29,8 +29,8 @@ interface FaceDetectionResponse {
   };
 }
 
-const AZURE_FACE_KEY = 'DSGpId23g854Ql5QmVK0uWN8Y19uhdDk3ROU8F6UGebcIK0D2cVQJQQJ99BDACYeBjFXJ3w3AAAKACOGf5Py'
-const AZURE_FACE_ENDPOINT = 'https://markmefaceapibymousa.cognitiveservices.azure.com/'
+const AZURE_FACE_KEY = ' '
+const AZURE_FACE_ENDPOINT = ''
 
 const PERSON_GROUP_ID = 'myfacegroup';
 const API_ENDPOINT = AZURE_FACE_ENDPOINT;
