@@ -41,7 +41,7 @@ export default function AutoMarkPage({ token }: { token: string }) {
             }))
           );
         }
-      } catch (err) {
+      } catch  {
         // Optionally handle error
       }
     };
