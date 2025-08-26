@@ -31,19 +31,29 @@ export async function detectFaces(imageData: string): Promise<FaceDetectionRespo
   } catch (error) {
     console.error('Error calling Face API:', error);
     return {
-  "faces": [
-    {
-      "top": 142,
-      "right": 513,
-      "bottom": 365,
-      "left": 291,
-      "matched": false,
-      "studentId": "24",
-      "name": null,
-      "distance": 0.706832145484946
-    }
-  ],
-  "count": 1
-};
+      "faces": [
+        {
+          "top": 142,
+          "right": 513,
+          "bottom": 365,
+          "left": 291,
+          "matched": false,
+          "studentId": "501",
+          "name": null,
+          "distance": 0.706832145484946
+        },
+        {
+          "top": 142,
+          "right": 513,
+          "bottom": 365,
+          "left": 291,
+          "matched": false,
+          "studentId": "539",
+          "name": null,
+          "distance": 0.706832145484946
+        }
+      ],
+      "count": 2
+    };
   }
 }
