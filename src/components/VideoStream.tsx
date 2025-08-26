@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { detectFaces } from '../utils/azureFaceApi';
+import { detectFaces } from '../utils/pythonFaceApi';
 
 interface Props {
   onFaceEvent: (faceId: string, type: 'check-in' | 'check-out') => void;
@@ -35,19 +35,19 @@ export default function VideoStream({ onFaceEvent }: Props) {
 
       try {
         const faces = await detectFaces(imageData);
-        const currentFaces = new Set(faces.map(face => face.faceId));
+        const currentFaces = new Set(faces.faces.map(face => face.studentId ?? ""));
 
         // Check for new faces (check-in)
-        currentFaces.forEach(faceId => {
-          if (!activeFaces.has(faceId)) {
-            onFaceEvent(faceId, 'check-in');
+        currentFaces.forEach(studentId => {
+          if (studentId && !activeFaces.has(studentId)) {
+            onFaceEvent(studentId, 'check-in');
           }
         });
 
         // Check for removed faces (check-out)
-        activeFaces.forEach(faceId => {
-          if (!currentFaces.has(faceId)) {
-            onFaceEvent(faceId, 'check-out');
+        activeFaces.forEach(studentId => {
+          if (!currentFaces.has(studentId)) {
+            onFaceEvent(studentId, 'check-out');
           }
         });
 
