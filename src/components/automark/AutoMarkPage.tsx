@@ -33,11 +33,18 @@ export default function AutoMarkPage({ token }: { token: string }) {
         if (res.ok) {
           const data = await res.json();
           // Map to dropdown model
+          type RawCourse = {
+            courseId: number;
+            code?: string;
+            courseCode?: string;
+            title?: string;
+            courseName?: string;
+          };
           setCourses(
-            data.map((c: any) => ({
+            (data as RawCourse[]).map((c) => ({
               courseId: c.courseId,
-              courseCode: c.code || c.courseCode,
-              courseName: c.title || c.courseName,
+              courseCode: c.code || c.courseCode || "",
+              courseName: c.title || c.courseName || "",
             }))
           );
         }
@@ -83,7 +90,7 @@ export default function AutoMarkPage({ token }: { token: string }) {
         },
         body: JSON.stringify(body)
       });
-    } catch (err) {
+    } catch {
       // Optionally handle error or show toast
     }
   };
