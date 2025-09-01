@@ -59,7 +59,7 @@ type Menu = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [menus, setMenus] = useState<NavMainItem[]>([
     {
-      title: "AMS - Tutor",
+      title: "Attendance Management",
       url: "#",
       icon: MonitorCog,
       isActive: true,

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { detectFaces } from '../utils/azureFaceApi';
+import { detectFaces } from '../utils/pythonFaceApi';
 
 interface Props {
   onFaceEvent: (faceId: string, type: 'check-in' | 'check-out') => void;
@@ -9,6 +9,7 @@ export default function VideoStream({ onFaceEvent }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [activeFaces, setActiveFaces] = useState<Set<string>>(new Set());
+  const activeFacesRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -23,6 +24,10 @@ export default function VideoStream({ onFaceEvent }: Props) {
   }, []);
 
   useEffect(() => {
+    activeFacesRef.current = activeFaces;
+  }, [activeFaces]);
+
+  useEffect(() => {
     const checkFaces = async () => {
       if (!videoRef.current || !canvasRef.current) return;
 
@@ -34,20 +39,20 @@ export default function VideoStream({ onFaceEvent }: Props) {
       const imageData = canvasRef.current.toDataURL('image/jpeg');
 
       try {
-        const faces = await detectFaces(imageData);
-        const currentFaces = new Set(faces.map(face => face.faceId));
+  const faces = await detectFaces(imageData);
+        const currentFaces = new Set(faces.faces.map(face => face.studentId ?? ""));
 
         // Check for new faces (check-in)
-        currentFaces.forEach(faceId => {
-          if (!activeFaces.has(faceId)) {
-            onFaceEvent(faceId, 'check-in');
+        currentFaces.forEach(studentId => {
+          if (studentId && !activeFacesRef.current.has(studentId)) {
+            onFaceEvent(studentId, 'check-in');
           }
         });
 
         // Check for removed faces (check-out)
-        activeFaces.forEach(faceId => {
-          if (!currentFaces.has(faceId)) {
-            onFaceEvent(faceId, 'check-out');
+        activeFacesRef.current.forEach(studentId => {
+          if (!currentFaces.has(studentId)) {
+            onFaceEvent(studentId, 'check-out');
           }
         });
 
@@ -59,7 +64,7 @@ export default function VideoStream({ onFaceEvent }: Props) {
 
     const interval = setInterval(checkFaces, 5000); // Check every 5 seconds
     return () => clearInterval(interval);
-  }, [activeFaces, onFaceEvent]);
+  }, [onFaceEvent]);
 
   return (
     <div>

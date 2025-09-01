@@ -29,24 +29,25 @@ interface FaceDetectionResponse {
   };
 }
 
-const AZURE_FACE_KEY = 'DSGpId23g854Ql5QmVK0uWN8Y19uhdDk3ROU8F6UGebcIK0D2cVQJQQJ99BDACYeBjFXJ3w3AAAKACOGf5Py'
-const AZURE_FACE_ENDPOINT = 'https://markmefaceapibymousa.cognitiveservices.azure.com/'
+const AZURE_FACE_KEY = ' '
+const AZURE_FACE_ENDPOINT = ''
 
 const PERSON_GROUP_ID = 'myfacegroup';
 const API_ENDPOINT = AZURE_FACE_ENDPOINT;
 const API_KEY = AZURE_FACE_KEY;
 
-export async function detectFaces(imageData: string): Promise<FaceDetectionResponse[]> {
-  const base64Data = imageData.replace(/^data:image\/jpeg;base64,/, '');
-  
+export async function detectFaces(imageFile: File): Promise<FaceDetectionResponse[]> {
+  const formData = new FormData();
+  formData.append('image', imageFile, imageFile.name);
+
   try {
-    const response = await fetch(`${AZURE_FACE_ENDPOINT}/face/v1.0/detect`, {
+    const response = await fetch('https://linux-python-face-api.azurewebsites.net/api/faces/detect-image', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/octet-stream',
-        'Ocp-Apim-Subscription-Key': AZURE_FACE_KEY,
+        'accept': 'application/json',
+        // Do not set Content-Type, browser will set it for multipart/form-data
       },
-      body: Buffer.from(base64Data, 'base64'),
+      body: formData,
     });
 
     if (!response.ok) {
